@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: abjad_school_portal_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: abjad_school_portal
+    ports:
+      - "5432:5432"
+    volumes:
+      - abjad_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  abjad_postgres_data:
