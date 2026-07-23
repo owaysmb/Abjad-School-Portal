@@ -5,7 +5,7 @@ import authRoutes from './routes/authRoutes'
 import classRoutes from './routes/classRoutes'
 import studentRoutes from "./routes/studentRoutes"
 import teacherRoutes from "./routes/teacherRoutes"
-
+import parentRoutes from "./routes/parentRoutes"
 dotenv.config()
 
 const app = express()
@@ -15,6 +15,9 @@ app.use('/api/auth', authRoutes)
 app.use('/api/classes',classRoutes);
 app.use("/api/student",studentRoutes);
 app.use("/api/teacher",teacherRoutes);
+app.use("/api/parent",parentRoutes);
+
+
 
 app.get('/', (req, res) => {
   res.json({ message: 'Abjad School Portal API running' })
