@@ -4,8 +4,9 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
+
 model User {
   id        String   @id @default(uuid())
   name      String
@@ -14,9 +15,9 @@ model User {
   role      Role
   createdAt DateTime @default(now())
 
-  teacher   Teacher?
-  student   Student?
-  parent    Parent?
+  teacher Teacher?
+  student Student?
+  parent  Parent?
 }
 
 enum Role {
@@ -37,7 +38,6 @@ model Teacher {
 
 model Student {
   id         String          @id @default(uuid())
-  name       String
   level      String
   user       User            @relation(fields: [userId], references: [id])
   userId     String          @unique
@@ -94,7 +94,7 @@ model Attendance {
   class     Class    @relation(fields: [classId], references: [id])
   classId   String
   teacher   Teacher  @relation(fields: [teacherId], references: [id])
-  teacherId String 
+  teacherId String
 }
 
 model Grade {
