@@ -6,6 +6,7 @@ import classRoutes from './routes/classRoutes'
 import studentRoutes from "./routes/studentRoutes"
 import teacherRoutes from "./routes/teacherRoutes"
 import parentRoutes from "./routes/parentRoutes"
+import attedanceRoutes from "./routes/attendanceRoutes"
 dotenv.config()
 
 const app = express()
@@ -16,6 +17,8 @@ app.use('/api/classes',classRoutes);
 app.use("/api/student",studentRoutes);
 app.use("/api/teacher",teacherRoutes);
 app.use("/api/parent",parentRoutes);
+app.use("/api/attendance",attedanceRoutes);
+
 
 
 
