@@ -8,9 +8,17 @@ import teacherRoutes from "./routes/teacherRoutes"
 import parentRoutes from "./routes/parentRoutes"
 import attedanceRoutes from "./routes/attendanceRoutes"
 import gradeRoutes from "./routes/gradeRoutes"
+import cors from 'cors'
+
 dotenv.config()
 
+
+
 const app = express()
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true 
+}));
 app.use(express.json())
 app.use(cookieParser())
 app.use('/api/auth', authRoutes)
