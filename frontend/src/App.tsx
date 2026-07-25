@@ -1,13 +1,13 @@
 
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './App.css'
-import { AuthProvider } from './src/context/AuthContext'
-import { AdminPage} from "./src/pages/admin/AdminPage"
-import {ParentPage} from "./src/pages/parent/ParentPage"
-import {TeacherPage} from "./src/pages/teacher/TeacherPage"
-import {StudentPage} from "./src/pages/student/StudentPage"
+import { AuthProvider } from './context/AuthContext'
+import { AdminPage} from "./pages/admin/AdminPage"
+import {ParentPage} from "./pages/parent/ParentPage"
+import {TeacherPage} from "./pages/teacher/TeacherPage"
+import {StudentPage} from "./pages/student/StudentPage"
 import { Navigate } from 'react-router-dom'
-import {LoginPage} from "./src/pages/Login"
+import {LoginPage} from "./pages/Login"
 
 function App() {
   return (

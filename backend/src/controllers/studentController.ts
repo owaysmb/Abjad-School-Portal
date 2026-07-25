@@ -33,7 +33,8 @@ export const createStudent = async (req: AuthRequest, res: Response) => {
     res.status(201).json(userWithoutPassword)
 
   } catch (err) {
-    res.status(500).json({ message: 'Error creating student' })
+      console.log(err)
+      res.status(500).json({ message: 'Error creating student', error: err })
   }
 }
 
@@ -43,19 +44,33 @@ export const getAllStudents = async (req:Request,res:Response) =>{
     try {
         
         const students = await prisma.student.findMany({
-            include: {
-                class: true,
-                user: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    role: true,
-                    createdAt: true
+          include: {
+            class: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                createdAt: true
+              }
+            },
+            parents: {
+              include: {
+                parent: {
+                  include: {
+                    user: {
+                      select: {
+                        name: true,
+                        email: true
+                      }
+                    }
+                  }
                 }
-                }
+              }
             }
-        })
+          }
+      })
 
         res.json(students);
 
