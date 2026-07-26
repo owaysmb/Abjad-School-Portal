@@ -159,10 +159,10 @@ console.log(students)
           <div className="form-group">
             <label className="form-label">Class</label>
             <select name="classId" onChange={handleChange} className="form-select">
-            {classes.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-</select>
+              {classes.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
           </div>
           
         </div>

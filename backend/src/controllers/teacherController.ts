@@ -30,33 +30,76 @@ export const createTeacher = async (req:Request,res:Response) =>{
 
     } catch (err) {
         res.status(500).json({message:"Error Creating Teacher"})
+        console.log(err);
     }
 }
 
-export const getAllTeachers = async (req:Request,res:Response) =>{
-    try {
+export const getAllTeachers = async (req: Request, res: Response) => {
+  try {
+    const teachers = await prisma.teacher.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            createdAt: true
+          }
+        },
+        classes: {
+          include: {
+            class: true
+          }
+        }
+      }
+    })
+    res.json(teachers)
+  } catch (err) {
+    res.status(500).json({ message: 'Error getting teachers' })
+  }
+}
 
-        const teachers = await prisma.teacher.findMany({
-            include:{
-                user:{
-                    select:{
-                        name:true,
-                        id:true,
-                        email:true,
-                        role:true,
-                        createdAt:true,
-                        
+export const assignTeacherToClass = async (req: Request, res: Response) => {
+  try {
+    const { teacherId, classId, subject } = req.body
+
+    const assignment = await prisma.classTeacher.create({
+      data: {
+        teacherId,
+        classId,
+        subject
+      }
+    })
+
+    res.json(assignment)
+  } catch (err) {
+    res.status(500).json({ message: 'Error assigning teacher to class' })
+    console.log(err);
+  }
+}
+
+export const getTeacherjob = async (req:Request,res:Response)=>{
+    try {
+        
+        const assigned = await prisma.classTeacher.findMany({
+              include: {
+                    class: true,
+                    teacher: {
+                    include: {
+                        user: {
+                        select: {
+                            name: true,
+                            email: true
+                        }
+                        }
+                    }
                     }
                 }
-            }
         })
-        res.json(teachers);
-        
+        res.json(assigned)
     } catch (err) {
-        res.status(500).json({message:"Error Getting All Teachers"})
+        res.status(500).json({message:"Error Getting Subject and Classes"})
+        console.log(err);        
     }
 }
-
-
-
-
