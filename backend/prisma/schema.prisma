@@ -33,6 +33,8 @@ model Teacher {
   userId     String         @unique
   classes    ClassTeacher[]
   attendance Attendance[]
+  Feedback   Feedback[]
+  Mood       Mood[]
 }
 
 model Student {
@@ -45,6 +47,8 @@ model Student {
   parents    ParentStudent[]
   attendance Attendance[]
   grades     Grade[]
+  Feedback   Feedback[]
+  Mood       Mood[]
 }
 
 model Parent {
@@ -114,4 +118,24 @@ model Announcement {
   body      String
   createdAt DateTime @default(now())
   authorId  String
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  note      String
+  date      DateTime @default(now())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+  teacherId String
+  teacher   Teacher  @relation(fields: [teacherId], references: [id])
+}
+
+model Mood {
+  id        String   @id @default(uuid())
+  mood      String // focused, tired, anxious, hyperactive, happy
+  date      DateTime @default(now())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+  teacherId String
+  teacher   Teacher  @relation(fields: [teacherId], references: [id])
 }

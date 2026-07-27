@@ -8,6 +8,9 @@ import teacherRoutes from "./routes/teacherRoutes"
 import parentRoutes from "./routes/parentRoutes"
 import attedanceRoutes from "./routes/attendanceRoutes"
 import gradeRoutes from "./routes/gradeRoutes"
+import feedbackRoutes from "./routes/feedbackRoutes"
+import moodRoutes from "./routes/moodRoutes"
+
 import cors from 'cors'
 
 dotenv.config()
@@ -28,8 +31,8 @@ app.use("/api/teacher",teacherRoutes);
 app.use("/api/parent",parentRoutes);
 app.use("/api/attendance",attedanceRoutes);
 app.use("/api/grade",gradeRoutes);
-
-
+app.use("/api/feedback", feedbackRoutes);
+app.use("/api/mood",moodRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Abjad School Portal API running' })

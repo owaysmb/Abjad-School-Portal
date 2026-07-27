@@ -1,8 +1,8 @@
-import { Request,Response } from "express";
-import { AuthRequest } from '../middleware/auth'
-import { PrismaClient } from "@prisma/client"
-import bcrypt from "bcrypt"
-const prisma = new PrismaClient();
+  import { Request,Response } from "express";
+  import { AuthRequest } from '../middleware/auth'
+  import { PrismaClient } from "@prisma/client"
+  import bcrypt from "bcrypt"
+  const prisma = new PrismaClient();
 
 
 export const createTeacher = async (req:Request,res:Response) =>{
