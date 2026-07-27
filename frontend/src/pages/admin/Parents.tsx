@@ -1,13 +1,120 @@
-import { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import api from "../../api/axios"
 
-const mockParents = [
-  { id: 1, name: 'Mohammed Ali', email: 'mohammed.ali@email.com', phone: '+966 555 111 222', children: 'Ahmed Ali' },
-  { id: 2, name: 'Fatima Hassan', email: 'fatima.h@email.com', phone: '+966 555 333 444', children: 'Sara Hassan' },
-  { id: 3, name: 'Ali Khalid', email: 'ali.k@email.com', phone: '+966 555 555 666', children: 'Omar Khalid' },
-]
+interface Parent {
+  id:string,
+  user:{
+    createdAt:string,
+    email:string,
+    id:string,
+    name:string,
+    role:string
+  },
+  children:{
+    parentId:string,
+    student:{
+      user:{
+      name:string
+    },
+    }
+  }[]
+}
+
+interface Student {
+  id: string
+  level: string
+  classId: string
+  userId: string
+  class: {
+    id: string
+    name: string
+    level: string
+  }
+  user: {
+    id: string
+    name: string
+    email: string
+    role: string
+    createdAt: string
+  }
+  parents: {
+    parent: {
+      user: {
+        name: string
+        email: string
+      }
+    }
+  }[]
+}
 
 export function Parents() {
-  const [parents] = useState(mockParents)
+  const [parents,setParents] = useState<Parent[]>([]);
+  
+  const [addParent,setAddParent] = useState({
+    name:"",
+    email:"",
+    password:"",
+  })
+  const [assignData, setAssignData] = useState({
+    parentId: '',
+    studentId: ''
+  })
+
+  const [students, setStudents] = useState<Student[]>([])
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      const { data } = await api.get('/student')
+      setStudents(data)
+      setAssignData(prev => ({ ...prev, studentId: data[0]?.id }))
+    }
+    fetchStudents()
+  }, [])
+  console.log(students)
+  useEffect(() => {
+    const fetchParents = async () => {
+      const { data } = await api.get('/parent')
+      setParents(data)
+      setAssignData(prev => ({ ...prev, parentId: data[0]?.id }))
+    }
+    fetchParents()
+  }, [])
+
+    const handleAssignChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setAssignData({ ...assignData, [e.target.name]: e.target.value })
+    }
+
+    const handleAssignSubmit = async (e: React.FormEvent) => {
+      e.preventDefault()
+      try {
+        await api.post('/parent/assign', assignData)
+        const { data } = await api.get('/parent')
+        setParents(data)
+      } catch (err) {
+        console.log(err)
+      }
+    }
+
+
+
+  const handleAddParent = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAddParent({ ...addParent, [e.target.name]: e.target.value })
+  }
+
+  const SubmitAddParent = async(e:React.FormEvent)=>{
+    e.preventDefault();
+    try {
+      
+      await api.post("/parent",addParent)
+      const {data} = await api.get('/parent');
+      setParents(data);
+
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  console.log(parents)
 
   return (
     <>
@@ -24,57 +131,80 @@ export function Parents() {
             <tr>
               <th>Name</th>
               <th>Email</th>
-              <th>Phone</th>
               <th>Children</th>
             </tr>
           </thead>
           <tbody>
             {parents.map((parent) => (
               <tr key={parent.id}>
-                <td>{parent.name}</td>
-                <td>{parent.email}</td>
-                <td>{parent.phone}</td>
-                <td>{parent.children}</td>
+                <td>{parent.user?.name}</td>
+                <td>{parent.user?.email}</td>
+                <td>{parent.children?.map(c => c.student?.user.name).join(', ')}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
+    
+    <form onSubmit={SubmitAddParent}>
       <div className="form-card">
         <h3 className="form-title">Add New Parent</h3>
         <div className="form-grid">
           <div className="form-group">
             <label className="form-label">Full Name</label>
-            <input className="form-input" type="text" placeholder="Enter parent name" />
+            <input className="form-input" name='name' type="text" placeholder="Enter parent name" onChange={handleAddParent} />
           </div>
           <div className="form-group">
             <label className="form-label">Email</label>
-            <input className="form-input" type="email" placeholder="parent@email.com" />
+            <input className="form-input" name='email' type="email" placeholder="parent@email.com" onChange={handleAddParent} />
           </div>
           <div className="form-group">
-            <label className="form-label">Phone</label>
-            <input className="form-input" type="tel" placeholder="+966 5XX XXX XXXX" />
+            <label className="form-label">Password</label>
+            <input className="form-input" name='password' type="password" placeholder="Enter Password" onChange={handleAddParent} />
           </div>
-          <div className="form-group">
-            <label className="form-label">Relationship</label>
-            <select className="form-select">
-              <option value="">Select relationship</option>
-              <option value="father">Father</option>
-              <option value="mother">Mother</option>
-              <option value="guardian">Guardian</option>
-            </select>
-          </div>
-          <div className="form-group full-width">
-            <label className="form-label">Address</label>
-            <input className="form-input" type="text" placeholder="Enter full address" />
-          </div>
+
         </div>
         <div className="form-actions">
           <button className="btn-secondary" type="button">Cancel</button>
-          <button className="btn-primary" type="button">Add Parent</button>
+          <button className="btn-primary" type="submit">Add Parent</button>
         </div>
       </div>
+    </form>
+      
+
+            <br />
+    <form onSubmit={handleAssignSubmit}>
+        <div className="form-card">
+          <h3 className="form-title">Assign a Parent</h3>
+          <div className="form-group">
+              <label className="form-label">Parent </label>
+              <select className="form-select" name="parentId" onChange={handleAssignChange}>
+              {parents.map((parent) => (
+                <option key={parent.id} value={parent.id}>
+                  {parent.user?.name}
+                </option>
+              ))}
+            </select>
+            </div>
+            <br />
+            <div className="form-group">
+              <label className="form-label">Children</label>
+              <select className="form-select" name="studentId" onChange={handleAssignChange}>
+                {students.map((student) => (
+                  <option key={student.id} value={student.id}>
+                    {student.user?.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          <div className="form-actions">
+            <button className="btn-secondary" type="button">Cancel</button>
+            <button className="btn-primary" type="submit">Assign</button>
+          </div>
+        </div>
+    </form>
+      
+
     </>
   )
 }

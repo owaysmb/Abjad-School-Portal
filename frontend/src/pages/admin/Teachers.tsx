@@ -147,7 +147,7 @@ export function Teachers() {
             </div>
             <div className="form-group">
               <label className="form-label">Password</label>
-              <input className="form-input" name='password' type="tel" placeholder="Enter Password" onChange={handleAddnewTeacherChange} />
+              <input className="form-input" name='password' type="password" placeholder="Enter Password" onChange={handleAddnewTeacherChange} />
             </div> 
             
           </div>

@@ -4,7 +4,7 @@ import { addFeedback,getMyChildFeedback,getStudentFeedback } from "../controller
 
 const router = express.Router();
 
-router.post('/',protect,authorize("ADMIN"),addFeedback);
+router.post('/',protect,authorize("ADMIN","TEACHER"),addFeedback);
 router.get('/:studentId',protect,getStudentFeedback);
 router.get('/mychild', protect,getMyChildFeedback );
 

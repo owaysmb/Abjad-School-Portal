@@ -113,3 +113,45 @@ export const getMyAttendance = async (req:AuthRequest,res:Response) =>{
         res.status(500).json({message:"Error Getting Attendance"})
     }
 }
+
+
+export const getMyChildrenAttendance = async (req: AuthRequest, res: Response) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ message: 'Not authorized' })
+            return
+        }
+
+        const parent = await prisma.parent.findUnique({
+            where: { userId: req.user.id }
+        })
+
+        if (!parent) {
+            res.status(404).json({ message: 'Parent not found' })
+            return
+        }
+
+        const studentParents = await prisma.parentStudent.findMany({
+            where: { parentId: parent.id },
+            select: { studentId: true }
+        })
+
+        const studentIds = studentParents.map(sp => sp.studentId)
+
+        const attendance = await prisma.attendance.findMany({
+            where: { studentId: { in: studentIds } },
+            include: {
+                student: {
+                    include: {
+                        user: { select: { id: true, name: true, email: true } }
+                    }
+                }
+            },
+            orderBy: { date: 'desc' }
+        })
+
+        res.json(attendance)
+    } catch (err) {
+        res.status(500).json({ message: "Error getting children's attendance" })
+    }
+}

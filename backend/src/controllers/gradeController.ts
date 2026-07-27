@@ -104,3 +104,45 @@ export const getMyGrades = async (req:AuthRequest,res:Response) =>{
         res.status(500).json({message:"Error Getting Grades"})       
     }
 }
+
+
+export const getMyChildrenGrades = async (req: AuthRequest, res: Response) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ message: 'Not authorized' })
+            return
+        }
+
+        const parent = await prisma.parent.findUnique({
+            where: { userId: req.user.id }
+        })
+
+        if (!parent) {
+            res.status(404).json({ message: 'Parent not found' })
+            return
+        }
+
+        const studentParents = await prisma.parentStudent.findMany({
+            where: { parentId: parent.id },
+            select: { studentId: true }
+        })
+
+        const studentIds = studentParents.map(sp => sp.studentId)
+
+        const grades = await prisma.grade.findMany({
+            where: { studentId: { in: studentIds } },
+            include: {
+                student: {
+                    include: {
+                        user: { select: { id: true, name: true, email: true } }
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        })
+
+        res.json(grades)
+    } catch (err) {
+        res.status(500).json({ message: "Error getting children's grades" })
+    }
+}

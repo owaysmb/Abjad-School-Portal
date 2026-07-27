@@ -31,6 +31,7 @@ export const createParent = async (req:Request,res:Response) =>{
         
     } catch (err) {
         res.status(500).json({message:"Error creating parent"})
+        console.log(err);
     }
 }
 
@@ -39,14 +40,15 @@ export const getAllParents = async (req:Request,res:Response) =>{
         
         const parents = await prisma.parent.findMany({
             include: {
-                user: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    role: true,
-                    createdAt: true
-                }
+                user: { select: { id: true, name: true, email: true, role: true, createdAt: true } },
+                children: {
+                    include: {
+                        student: {
+                            include: {
+                                user: { select: { name: true } }
+                            }
+                        }
+                    }
                 }
             }
         })
@@ -75,5 +77,45 @@ export const assignChildToParent = async (req:Request,res:Response) =>{
 
     } catch (err) {
         res.status(500).json({message:"Error Assigning child to jus parent"})
+    }
+}
+
+export const getMyChildren = async (req: AuthRequest, res: Response) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ message: 'Not authorized' })
+            return
+        }
+
+        const parent = await prisma.parent.findUnique({
+            where: { userId: req.user.id }
+        })
+
+        if (!parent) {
+            res.status(404).json({ message: 'Parent not found' })
+            return
+        }
+
+        const children = await prisma.parentStudent.findMany({
+            where: { parentId: parent.id },
+            include: {
+                student: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                            }
+                        },
+                        class: true
+                    }
+                }
+            }
+        })
+
+        res.json(children)
+    } catch (err) {
+        res.status(500).json({ message: "Error getting children" })
     }
 }
