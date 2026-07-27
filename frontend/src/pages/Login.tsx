@@ -87,7 +87,7 @@ export function LoginPage() {
             Contact your administrator for account access
           </p>
         </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {error && <p className="login-error">{error}</p>}
       </div>
       
     </div>

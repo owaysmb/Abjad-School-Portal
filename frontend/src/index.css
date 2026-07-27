@@ -1,22 +1,31 @@
 :root {
-  --bg-primary: #F5F0E8;
-  --bg-sidebar: #3D4A2E;
-  --text-sidebar: #F0EAD6;
-  --accent: #6B7C4B;
-  --accent-hover: #5A6A3E;
-  --accent-secondary: #8B6914;
-  --bg-card: #FDFAF4;
-  --bg-table-header: #4A3728;
-  --text-primary: #2C1810;
-  --text-secondary: #6B5B4E;
-  --border: #D4C5A9;
-  --success: #5A7A3A;
-  --danger: #A0522D;
-  --mood-focused: #6B7C4B;
+  --bg-primary: #EDE4CC;
+  --bg-sidebar: #2D4A1E;
+  --text-sidebar: #F5EDD6;
+  --accent: #4A7A2E;
+  --accent-hover: #3D6428;
+  --accent-secondary: #8B5E2A;
+  --bg-card: #FAF5E8;
+  --bg-table-header: #3D2B1A;
+  --text-primary: #1A0F00;
+  --text-secondary: #5C4A2A;
+  --border: #C4A882;
+  --success: #3D6428;
+  --danger: #8B2A1A;
+  --mood-focused: #4A7A2E;
   --mood-tired: #C4A35A;
   --mood-anxious: #C47A3A;
-  --mood-hyperactive: #A0522D;
-  --mood-happy: #7A9A5A;
+  --mood-hyperactive: #8B2A1A;
+  --mood-happy: #5C7A2A;
+
+  --input-bg: #FBF7EE;
+  --input-border: #C4A882;
+  --input-focus: #5C7A2A;
+  --heading-color: #2D1A00;
+  --btn-primary: #5C7A2A;
+  --btn-primary-hover: #4A6422;
+  --btn-secondary: #8B5E2A;
+  --table-row-hover: #E8DCC0;
 
   --sans: 'Georgia', 'Times New Roman', serif;
   --heading: 'Georgia', 'Times New Roman', serif;
@@ -48,7 +57,7 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--heading);
-  color: var(--text-primary);
+  color: var(--heading-color);
 }
 
 input, select, textarea, button {
