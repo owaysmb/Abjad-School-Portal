@@ -29,7 +29,7 @@ enum Role {
 
 model Teacher {
   id         String         @id @default(uuid())
-  user       User           @relation(fields: [userId], references: [id])
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String         @unique
   classes    ClassTeacher[]
   attendance Attendance[]
@@ -40,7 +40,7 @@ model Teacher {
 model Student {
   id         String          @id @default(uuid())
   level      String
-  user       User            @relation(fields: [userId], references: [id])
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String          @unique
   classId    String
   class      Class           @relation(fields: [classId], references: [id])
@@ -53,15 +53,15 @@ model Student {
 
 model Parent {
   id       String          @id @default(uuid())
-  user     User            @relation(fields: [userId], references: [id])
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   String          @unique
   children ParentStudent[]
 }
 
 model ParentStudent {
-  parent    Parent  @relation(fields: [parentId], references: [id])
+  parent    Parent  @relation(fields: [parentId], references: [id], onDelete: Cascade)
   parentId  String
-  student   Student @relation(fields: [studentId], references: [id])
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
   studentId String
 
   @@id([parentId, studentId])
@@ -78,9 +78,9 @@ model Class {
 }
 
 model ClassTeacher {
-  class     Class   @relation(fields: [classId], references: [id])
+  class     Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
   classId   String
-  teacher   Teacher @relation(fields: [teacherId], references: [id])
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   teacherId String
   subject   String
 
@@ -91,7 +91,7 @@ model Attendance {
   id        String   @id @default(uuid())
   date      DateTime
   present   Boolean
-  student   Student  @relation(fields: [studentId], references: [id])
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   studentId String
   class     Class    @relation(fields: [classId], references: [id])
   classId   String
@@ -105,7 +105,7 @@ model Grade {
   score     Float
   maxScore  Float
   term      String
-  student   Student  @relation(fields: [studentId], references: [id])
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   studentId String
   class     Class    @relation(fields: [classId], references: [id])
   classId   String
@@ -125,17 +125,17 @@ model Feedback {
   note      String
   date      DateTime @default(now())
   studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   teacherId String
   teacher   Teacher  @relation(fields: [teacherId], references: [id])
 }
 
 model Mood {
   id        String   @id @default(uuid())
-  mood      String // focused, tired, anxious, hyperactive, happy
+  mood      String
   date      DateTime @default(now())
   studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   teacherId String
   teacher   Teacher  @relation(fields: [teacherId], references: [id])
 }

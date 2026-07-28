@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../../api/axios'
+import { MdDelete } from "react-icons/md";
 
 interface Student {
   id: string
@@ -77,6 +78,16 @@ export function Students() {
     }
   }
 
+  const handleDelete = async (studentId: string) => {
+  try {
+    await api.delete(`/student/${studentId}`)
+    const { data } = await api.get('/student')
+    setStudents(data)
+  } catch (err) {
+    console.log('Error deleting student', err)
+  }
+}
+
   useEffect(()=>{
 
     const fetchStudents = async ()=>{
@@ -126,6 +137,12 @@ console.log(students)
                 <td>{student?.class.name}</td>
                 <td>{student?.level}</td>
                 <td>{student?.parents?.map((p) => p?.parent?.user?.name).join(', ')}</td>
+                <td>
+                  <MdDelete 
+                    onClick={() => handleDelete(student.id)} 
+                    style={{ cursor: 'pointer', color: 'red' }}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>

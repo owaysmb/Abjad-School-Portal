@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import api from "../../api/axios"
+import { MdDelete } from "react-icons/md";
 
 interface Parent {
   id:string,
@@ -114,6 +115,17 @@ export function Parents() {
     }
   }
 
+    const handleDelete = async (parentId: string) => {
+      try {
+        await api.delete(`/parent/${parentId}`)
+        const { data } = await api.get('/parent')
+        setParents(data)
+      } catch (err) {
+        console.log('Error deleting parent', err)
+      }
+    }
+
+
   console.log(parents)
 
   return (
@@ -140,6 +152,12 @@ export function Parents() {
                 <td>{parent.user?.name}</td>
                 <td>{parent.user?.email}</td>
                 <td>{parent.children?.map(c => c.student?.user.name).join(', ')}</td>
+                <td>
+                  <MdDelete 
+                    onClick={() => handleDelete(parent.id)} 
+                    style={{ cursor: 'pointer', color: 'red' }}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>

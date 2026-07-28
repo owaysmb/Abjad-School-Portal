@@ -6,6 +6,7 @@ import { Teachers } from './Teachers'
 import { Parents } from './Parents'
 import { Classes } from './Classes'
 import './AdminPage.css'
+import { useAuth } from '../../context/AuthContext'
 
 type Section = 'overview' | 'students' | 'teachers' | 'parents' | 'classes'
 
@@ -28,6 +29,12 @@ const sectionTitles: Record<Section, { title: string; subtitle: string }> = {
 export function AdminPage() {
   const [activeSection, setActiveSection] = useState<Section>('overview')
   const navigate = useNavigate()
+  const auth = useAuth()
+
+  const handleLogout = async () => {
+    await auth?.logout()
+    navigate('/login')
+  }
 
   const renderContent = () => {
     switch (activeSection) {
@@ -65,7 +72,7 @@ export function AdminPage() {
         </nav>
 
         <div className="admin-sidebar-footer">
-          <button className="admin-sidebar-logout" onClick={() => navigate('/login')}>
+          <button className="admin-sidebar-logout" onClick={handleLogout }>
             <span className="admin-sidebar-item-icon">🚪</span>
             Logout
           </button>

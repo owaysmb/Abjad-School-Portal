@@ -1,13 +1,107 @@
-import { useState } from 'react'
+import { useState ,useEffect} from 'react'
+import api from "../../api/axios"
+import { MdDelete } from "react-icons/md";
 
-const mockClasses = [
-  { id: 1, name: 'Class A', teacher: 'Khalid Mohammed', schedule: 'Sun - Tue, 8:00 AM', room: '101', students: 30 },
-  { id: 2, name: 'Class B', teacher: 'Nora Saeed', schedule: 'Mon - Wed, 9:00 AM', room: '205', students: 28 },
-  { id: 3, name: 'Class C', teacher: 'Youssef Ibrahim', schedule: 'Sun - Thu, 10:00 AM', room: '302', students: 25 },
-]
+interface Student {
+  id: string
+  level: string
+  classId: string
+  userId: string
+  class: {
+    id: string
+    name: string
+    level: string
+  }
+  user: {
+    id: string
+    name: string
+    email: string
+    role: string
+    createdAt: string
+  }
+  parents: {
+    parent: {
+      user: {
+        name: string
+        email: string
+      }
+    }
+  }[]
+}
+
+interface Teacher {
+  id: string,
+  user: {
+    createdAt: string,
+    email: string,
+    userId: string,
+    name: string,
+    role: string
+  },
+  classes: {
+    subject: string,
+    class: {
+      id: string,
+      name: string,
+      level: string
+    }
+  }[]
+}
+
+interface Class{
+  id:string,
+  level:string,
+  name:string,
+  students:Student[],
+  teachers:Teacher[],
+}
+
 
 export function Classes() {
-  const [classes] = useState(mockClasses)
+  const [classes, setClasses] = useState<Class[]>([])   
+  const [addClass,setAddClass] = useState({
+    name:"",
+    level:""
+  })
+
+
+
+  useEffect(()=>{
+    const fetchClasses = async ()=>{
+      const {data} = await api.get('/classes')
+      setClasses(data);
+      // setFormData(prev => ({ ...prev, classId: data[0]?.id }))
+    }
+    fetchClasses()
+  },[])
+  console.log(classes)
+
+  const handleAddClass = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>{
+    setAddClass({...addClass,[e.target.name]: e.target.value})
+  }
+
+  const handleSubmit = async (e:React.FormEvent) =>{
+    e.preventDefault()
+    try {
+      
+      await api.post("/classes",addClass);
+      const {data} = await api.get("/classes")
+      setClasses(data);
+
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  const handleDelete = async (classId: string) => {
+    try {
+      await api.delete(`/classes/${classId}`)
+      const { data } = await api.get('/classes')
+      setClasses(data)
+    } catch (err) {
+      console.log('Error deleting classes', err)
+    }
+  }
 
   return (
     <>
@@ -15,7 +109,6 @@ export function Classes() {
         <h2 className="section-title">
           Classes <span className="section-count">({classes.length})</span>
         </h2>
-        <button className="add-button">+ Add Class</button>
       </div>
 
       <div className="table-card">
@@ -23,70 +116,56 @@ export function Classes() {
           <thead>
             <tr>
               <th>Class Name</th>
-              <th>Teacher</th>
-              <th>Schedule</th>
-              <th>Room</th>
-              <th>Students</th>
+              <th>Numbrer of Teachers</th>
+              <th>Number of Students</th>
             </tr>
           </thead>
           <tbody>
             {classes.map((cls) => (
               <tr key={cls.id}>
                 <td>{cls.name}</td>
-                <td>{cls.teacher}</td>
-                <td>{cls.schedule}</td>
-                <td>{cls.room}</td>
-                <td>{cls.students}</td>
+                <td>{cls.teachers?.length}</td>
+                <td>{cls.students?.length}</td>
+                <td>
+                  <MdDelete 
+                    onClick={() => handleDelete(cls.id)} 
+                    style={{ cursor: 'pointer', color: 'red' }}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <div className="form-card">
-        <h3 className="form-title">Add New Class</h3>
-        <div className="form-grid">
-          <div className="form-group">
-            <label className="form-label">Class Name</label>
-            <input className="form-input" type="text" placeholder="e.g. Class D" />
+      <form onSubmit={handleSubmit}>
+          <div className="form-card">
+          <h3 className="form-title">Add New Class</h3>
+          <div className="form-grid">
+            <div className="form-group">
+              <label className="form-label">Class Name</label>
+              <input className="form-input" name='name' type="text" placeholder="e.g. Class D"  onChange={handleAddClass}/>
+            </div>
+
+
+            <div className="form-group">
+              <label className="form-label">Level</label>
+              <select className="form-select" name='level' onChange={handleAddClass} >
+                <option value="">Select Level</option>
+                <option value="Primary">Primary</option>
+                <option value="Mid">Mid</option>
+                <option value="High">High</option>
+              </select>
+            </div>
           </div>
-          <div className="form-group">
-            <label className="form-label">Teacher</label>
-            <select className="form-select">
-              <option value="">Select teacher</option>
-              <option value="1">Khalid Mohammed</option>
-              <option value="2">Nora Saeed</option>
-              <option value="3">Youssef Ibrahim</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Schedule</label>
-            <input className="form-input" type="text" placeholder="e.g. Sun - Tue, 8:00 AM" />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Room</label>
-            <input className="form-input" type="text" placeholder="e.g. 101" />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Max Capacity</label>
-            <input className="form-input" type="number" placeholder="30" min="1" />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Grade Level</label>
-            <select className="form-select">
-              <option value="">Select grade</option>
-              <option value="9th">9th</option>
-              <option value="10th">10th</option>
-              <option value="11th">11th</option>
-              <option value="12th">12th</option>
-            </select>
+          <div className="form-actions">
+            <button className="btn-secondary" type="button">Cancel</button>
+            <button className="btn-primary" type="submit">Add Class</button>
           </div>
         </div>
-        <div className="form-actions">
-          <button className="btn-secondary" type="button">Cancel</button>
-          <button className="btn-primary" type="button">Add Class</button>
-        </div>
-      </div>
+      </form> 
+
+      
     </>
   )
 }

@@ -103,3 +103,22 @@ export const getTeacherjob = async (req:Request,res:Response)=>{
         console.log(err);        
     }
 }
+
+export const deleteTeacher = async (req:Request,res:Response)=>{
+  try {
+    
+    const id = req.params.id as string;
+
+    const teacher = await prisma.teacher.findUnique({where:{id}})
+
+    if(!teacher) {
+      res.status(400).json({message:"teacher Not Found"})
+    }
+
+    await prisma.user.delete({ where: { id: teacher?.userId } })
+    res.json({ message: 'Student deleted successfully' })
+
+  } catch (err) {
+    res.status(500).json({message:"Error Deleting Teacher"})
+  }
+}

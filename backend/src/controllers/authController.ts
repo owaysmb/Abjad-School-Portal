@@ -2,6 +2,7 @@ import { Request,Response } from "express";
 import bcrypt from "bcrypt"
 import { PrismaClient } from "@prisma/client"
 import { generateToken } from "../utils/jwt";
+import { AuthRequest } from '../middleware/auth'
 
 const prisma = new PrismaClient();
 
@@ -48,7 +49,8 @@ export const login = async (req:Request,res:Response) =>{
 
         res.cookie('token', token, {
         httpOnly: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/'
         })
         const { password: _, ...userWithoutPassword } = user
         res.status(200).json({ user: userWithoutPassword })
@@ -58,4 +60,29 @@ export const login = async (req:Request,res:Response) =>{
     }
 
     
+}
+export const logout = async (req: Request, res: Response) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax" 
+  })
+  
+  res.json({ message: 'Logged out successfully' })
+}
+
+export const getMe = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' })
+      return
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { id: true, name: true, email: true, role: true }
+    })
+    res.json({ user })
+  } catch (err) {
+    res.status(500).json({ message: 'Error getting user' })
+  }
 }

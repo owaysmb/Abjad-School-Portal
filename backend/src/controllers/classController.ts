@@ -42,3 +42,19 @@ export const getAllClasses = async (req: AuthRequest, res: Response) => {
     }
 
 }
+
+export const deleteClass = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string
+    const classes = await prisma.student.findMany({ where: { classId: id } })
+    if (classes.length > 0) {
+      res.status(400).json({ message: 'Cannot delete class with classes assigned' })
+      return
+    }
+    await prisma.class.delete({ where: { id } })
+    res.json({ message: 'Class deleted successfully' })
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting class' })
+    console.log(err);
+  }
+}

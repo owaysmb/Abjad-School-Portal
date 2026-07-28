@@ -65,6 +65,13 @@ export const assignChildToParent = async (req:Request,res:Response) =>{
     try {
         const {parentId,studentId} = req.body;
 
+        const existing = await prisma.parentStudent.findFirst({
+            where:{studentId}
+        })
+        if (existing) {
+            res.status(400).json({ message: 'Student already has a parent assigned' })
+            return
+        }
         const assignChild = await prisma.parentStudent.create({
             data: {
                 parentId,
@@ -118,4 +125,20 @@ export const getMyChildren = async (req: AuthRequest, res: Response) => {
     } catch (err) {
         res.status(500).json({ message: "Error getting children" })
     }
+}
+
+
+export const deleteParent = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string
+    const parent = await prisma.parent.findUnique({ where: { id } })
+    if (!parent) {
+      res.status(404).json({ message: 'Parent not found' })
+      return
+    }
+    await prisma.user.delete({ where: { id: parent.userId } })
+    res.json({ message: 'Parent deleted successfully' })
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting parent' })
+  }
 }

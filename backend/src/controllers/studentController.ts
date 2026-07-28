@@ -79,3 +79,18 @@ export const getAllStudents = async (req:Request,res:Response) =>{
     }
 
 }
+
+export const deleteStudent = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string
+    const student = await prisma.student.findUnique({ where: { id } })
+    if (!student) {
+      res.status(404).json({ message: 'Student not found' })
+      return
+    }
+    await prisma.user.delete({ where: { id: student.userId } })
+    res.json({ message: 'Student deleted successfully' })
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting student' })
+  }
+}
