@@ -36,15 +36,50 @@ export const login = async (req:Request,res:Response) =>{
 
         const {email,password} = req.body;
     
-        const user = await prisma.user.findFirst({
+        let user = await prisma.user.findUnique({
             where:{
                 email:email,
             }
         })
 
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            return res.status(401).json({ error: "Invalid email or password" });
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid email or password' })
         }
+
+        const now = Date.now();
+
+        if(user.lockUntil && user.lockUntil.getTime() > now ){
+            return res.status(423).json({
+                message:"account locked",
+                lockUntil:user.lockUntil
+            });
+        }
+
+        const passwordMatch = await bcrypt.compare(password, user.password)
+
+        if(!passwordMatch){
+            const attempts = user.failedLoginAttempts + 1
+            const locked = attempts >= 5
+
+            await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                failedLoginAttempts: attempts,
+                lockUntil: locked ? new Date(Date.now() + 15 * 60 * 1000) : null // lock 15 mins
+                }
+            })
+
+            return res.status(401).json({
+                error: locked ? 'Account locked for 15 minutes' : 'Invalid email or password'
+            })
+
+        }
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { failedLoginAttempts: 0, lockUntil: null }
+        })
+
         const token = generateToken(user.id, user.role)
 
         res.cookie('token', token, {

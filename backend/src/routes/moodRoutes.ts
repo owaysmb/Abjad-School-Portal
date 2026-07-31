@@ -4,8 +4,8 @@ import { addMood,getStudentMood,getMyChildMood } from "../controllers/moodContro
 const router = express.Router();
 
 router.post('/',protect,authorize("ADMIN","TEACHER"),addMood);
+router.get('/mychild', protect, authorize('PARENT'), getMyChildMood)
 router.get('/:studentId',protect,getStudentMood);
-router.post('/mychild', protect, authorize('ADMIN'),getMyChildMood );
 
 
 export default router

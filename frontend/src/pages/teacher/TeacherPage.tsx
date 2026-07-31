@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import api from '../../api/axios'
 import type { TeacherJob, Student, MoodType } from '../../types'
 import './TeacherPage.css'
+import { useAuth } from '../../context/AuthContext'
 
 type Section = 'classes' | 'attendance' | 'feedback' | 'mood' | 'grades'
 
@@ -40,6 +41,14 @@ export function TeacherPage() {
   const [submitting, setSubmitting] = useState(false)
   const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
+  const auth = useAuth();
+
+  const handleLogout = async () => {
+    await auth?.logout()
+    navigate('/login')
+  }
+  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -54,9 +63,10 @@ export function TeacherPage() {
       } finally {
         setLoading(false)
       }
-    }
+    } 
     fetchData()
   }, [])
+
 
   const clearFormState = () => {
     setSubmitting(false)
@@ -377,15 +387,20 @@ export function TeacherPage() {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Subject</label>
-                  <input
-                    className="form-input"
-                    type="text"
-                    placeholder="e.g. Mathematics"
-                    value={gradeForm.subject}
-                    onChange={(e) => setGradeForm({ ...gradeForm, subject: e.target.value })}
-                    required
-                  />
-                </div>
+                  <select className="form-select"
+                      name="subject" 
+                      onChange={(e) => setGradeForm({ ...gradeForm, subject: e.target.value })} 
+                      value={gradeForm.subject}
+                      required >
+                      <option value="">Select subject</option>
+                      <option value="math">Mathematics</option>
+                      <option value="english">English</option>
+                      <option value="science">Science</option>
+                      <option value="history">History</option>
+                      <option value="arabic">Arabic</option>
+                  </select>
+                </div>  
+
                 <div className="form-group">
                   <label className="form-label">Term</label>
                   <input
@@ -464,7 +479,7 @@ export function TeacherPage() {
         </nav>
 
         <div className="teacher-sidebar-footer">
-          <button className="teacher-sidebar-logout" onClick={() => navigate('/login')}>
+          <button className="teacher-sidebar-logout"  onClick={handleLogout}>
             <span className="teacher-sidebar-item-icon">🚪</span>
             Logout
           </button>

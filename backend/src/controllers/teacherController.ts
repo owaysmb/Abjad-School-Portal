@@ -79,10 +79,18 @@ export const assignTeacherToClass = async (req: Request, res: Response) => {
   }
 }
 
-export const getTeacherjob = async (req:Request,res:Response)=>{
+export const getTeacherjob = async (req:AuthRequest,res:Response)=>{
     try {
+        const id = req.user?.id;
+
+        const teacher = await prisma.teacher.findUnique({ where: { userId: id } })
         
+        if(!teacher) {
+          res.status(400).json({message:"teacher Not Found"})
+        }
+
         const assigned = await prisma.classTeacher.findMany({
+          where:{teacherId:teacher?.id},
               include: {
                     class: true,
                     teacher: {

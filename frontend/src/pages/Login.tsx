@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 
 import './Login.css'
 
+import { AxiosError } from 'axios';
+
 export function LoginPage() {
     const auth = useAuth()
     const { login } = auth! 
@@ -13,17 +15,26 @@ export function LoginPage() {
     const [error, setError] = useState('')
     const navigate = useNavigate()
 
-
     const onFormSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        try {
-            const user = await login(email, password)
-            if (user.role === 'ADMIN') navigate('/admin')
-            else if (user.role === 'TEACHER') navigate('/teacher')
-            else if (user.role === 'STUDENT') navigate('/student')
-            else if (user.role === 'PARENT') navigate('/parent')
-        } catch {
-            setError('Invalid email or password')
+
+
+      e.preventDefault()
+      try {
+          const user = await login(email, password)
+          if (user.role === 'ADMIN') navigate('/admin')
+          else if (user.role === 'TEACHER') navigate('/teacher')
+          else if (user.role === 'STUDENT') navigate('/student')
+          else if (user.role === 'PARENT') navigate('/parent')
+      }  catch (error: unknown) {
+
+          const err = error as AxiosError;
+          const status = err.status || err.response?.status;
+
+          if (status === 423) {
+            setError("Account locked for 15 minutes");
+          } else {
+            setError("Invalid email or password");
+          }
         }
     }
 

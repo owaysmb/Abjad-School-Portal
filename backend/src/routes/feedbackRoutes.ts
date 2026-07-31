@@ -4,8 +4,8 @@ import { addFeedback,getMyChildFeedback,getStudentFeedback } from "../controller
 
 const router = express.Router();
 
-router.post('/',protect,authorize("ADMIN","TEACHER"),addFeedback);
-router.get('/:studentId',protect,getStudentFeedback);
-router.get('/mychild', protect,getMyChildFeedback );
+router.post('/', protect, authorize('ADMIN', 'TEACHER'), addFeedback)
+router.get('/mychild', protect, getMyChildFeedback)
+router.get('/:studentId', protect, getStudentFeedback)
 
 export default router

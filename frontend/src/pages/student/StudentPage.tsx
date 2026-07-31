@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import api from '../../api/axios'
 import type { GradeEntry, AttendanceEntry } from '../../types'
 import './StudentPage.css'
+import { useAuth } from '../../context/AuthContext'
 
 type Section = 'grades' | 'attendance'
 
@@ -60,6 +61,15 @@ export function StudentPage() {
     }
     fetchData()
   }, [activeSection])
+
+
+  const auth = useAuth();
+  
+  const handleLogout = async () => {
+    await auth?.logout()
+    navigate('/login')
+  }
+  
 
   const renderContent = () => {
     if (loading) {
@@ -164,7 +174,7 @@ export function StudentPage() {
         </nav>
 
         <div className="student-sidebar-footer">
-          <button className="student-sidebar-logout" onClick={() => navigate('/login')}>
+          <button className="student-sidebar-logout"  onClick={handleLogout}>
             <span className="student-sidebar-item-icon">🚪</span>
             Logout
           </button>

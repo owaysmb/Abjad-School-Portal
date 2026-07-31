@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import api from '../../api/axios'
 import type { ChildItem, FeedbackEntry, MoodEntry, GradeEntry, AttendanceEntry } from '../../types'
 import './ParentPage.css'
+import { useAuth } from '../../context/AuthContext'
 
 type Section = 'children' | 'feedback' | 'mood' | 'grades' | 'attendance'
 
@@ -58,6 +59,14 @@ export function ParentPage() {
     attendance: false,
   })
 
+  const auth = useAuth();
+
+  const handleLogout = async () => {
+    await auth?.logout()
+    navigate('/login')
+  }
+
+
   useEffect(() => {
     const fetchChildren = async () => {
       setLoading((prev) => ({ ...prev, children: true }))
@@ -90,12 +99,13 @@ export function ParentPage() {
     }
   }, [activeSection])
 
+
   useEffect(() => {
     if (activeSection === 'mood') {
       const fetchMoods = async () => {
         setLoading((prev) => ({ ...prev, mood: true }))
         try {
-          const { data } = await api.post('/mood/mychild')
+          const { data } = await api.get('/mood/mychild')
           setMoods(data)
         } catch {
           console.error('Failed to fetch moods')
@@ -305,7 +315,7 @@ export function ParentPage() {
         </nav>
 
         <div className="parent-sidebar-footer">
-          <button className="parent-sidebar-logout" onClick={() => navigate('/login')}>
+          <button className="parent-sidebar-logout" onClick={handleLogout}>
             <span className="parent-sidebar-item-icon">🚪</span>
             Logout
           </button>

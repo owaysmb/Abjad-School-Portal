@@ -78,7 +78,10 @@ export const getMyChildFeedback = async (req:AuthRequest,res:Response)=>{
         const parent = await prisma.parent.findUnique({
             where: { userId: req.user?.id }
         })
-
+        if (!parent) {
+            res.status(404).json({ message: 'Parent not found' })
+            return
+        }
         const studentParent = await prisma.parentStudent.findMany({
             where:{parentId:parent?.id},
             include:{
@@ -118,5 +121,6 @@ export const getMyChildFeedback = async (req:AuthRequest,res:Response)=>{
         
     } catch (err) {
         res.status(500).json({message:"Error Getting Feedback"})
+        console.log(err)
     }
 }
