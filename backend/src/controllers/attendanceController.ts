@@ -155,3 +155,21 @@ export const getMyChildrenAttendance = async (req: AuthRequest, res: Response) =
         res.status(500).json({ message: "Error getting children's attendance" })
     }
 }
+
+export const updateAttendance = async (req:AuthRequest,res:Response) =>{
+    try {
+
+        const id = req.params?.id as string;
+        const {present} = req.body;
+
+        const attendance = await prisma.attendance.update({
+            where:{id},
+            data:{present}
+        })
+        res.json(attendance);
+
+    } catch (err) {
+        res.status(500).json({message:"Error Updating Atterndance"})
+        console.log(err);
+    }
+}

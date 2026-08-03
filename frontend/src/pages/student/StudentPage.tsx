@@ -50,7 +50,7 @@ export function StudentPage() {
           const { data } = await api.get('/grade/mygrade')
           setGrades(data)
         } else {
-          const { data } = await api.post('/attendance/me')
+          const { data } = await api.get('/attendance/me')
           setAttendance(data)
         }
       } catch {

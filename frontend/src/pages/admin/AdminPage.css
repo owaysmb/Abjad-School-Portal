@@ -427,6 +427,25 @@
   border-color: #6B4A1E;
 }
 
+.form-message {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.form-message.success {
+  background-color: rgba(90, 122, 58, 0.1);
+  color: #3D6428;
+  border: 1px solid rgba(90, 122, 58, 0.2);
+}
+
+.form-message.error {
+  background-color: rgba(160, 82, 45, 0.1);
+  color: #8B2A1A;
+  border: 1px solid rgba(160, 82, 45, 0.2);
+}
+
 @media (max-width: 768px) {
   .admin-sidebar {
     display: none;

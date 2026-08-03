@@ -426,6 +426,230 @@
   border: 1px solid rgba(160, 82, 45, 0.2);
 }
 
+/* My Activity tabs */
+.activity-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.activity-tab {
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.activity-tab:hover {
+  background-color: rgba(212, 197, 169, 0.2);
+}
+
+.activity-tab.active {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-sidebar);
+}
+
+/* Activity tables */
+.activity-card {
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.activity-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.activity-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--bg-table-header);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: rgba(74, 55, 40, 0.06);
+  border-bottom: 1px solid var(--border);
+}
+
+.activity-table td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-primary);
+  border-bottom: 1px solid rgba(212, 197, 169, 0.5);
+}
+
+.activity-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.activity-table tbody tr:hover {
+  background-color: rgba(107, 124, 75, 0.04);
+}
+
+/* Attendance badge */
+.activity-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.activity-present {
+  background-color: rgba(90, 122, 58, 0.12);
+  color: var(--success);
+}
+
+.activity-absent {
+  background-color: rgba(160, 82, 45, 0.12);
+  color: var(--danger);
+}
+
+/* Score colors */
+.activity-score-high {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.activity-score-medium {
+  color: #B5651D;
+  font-weight: 600;
+}
+
+.activity-score-low {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* Feedback cards */
+.activity-feedback-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activity-feedback-card {
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+}
+
+.activity-feedback-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.activity-feedback-student {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  background-color: rgba(107, 124, 75, 0.1);
+  padding: 2px 10px;
+  border-radius: 12px;
+}
+
+.activity-feedback-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.activity-feedback-note {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* Mood timeline */
+.activity-mood-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.activity-mood-entry {
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.activity-mood-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  flex-shrink: 0;
+}
+
+.activity-mood-badge.focused {
+  background-color: rgba(107, 124, 75, 0.15);
+  color: var(--mood-focused);
+}
+
+.activity-mood-badge.tired {
+  background-color: rgba(196, 163, 90, 0.2);
+  color: #8B7332;
+}
+
+.activity-mood-badge.anxious {
+  background-color: rgba(196, 122, 58, 0.15);
+  color: var(--mood-anxious);
+}
+
+.activity-mood-badge.hyperactive {
+  background-color: rgba(184, 85, 45, 0.15);
+  color: #B8552D;
+}
+
+.activity-mood-badge.happy {
+  background-color: rgba(122, 154, 90, 0.15);
+  color: var(--mood-happy);
+}
+
+.activity-mood-entry-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-mood-entry-student {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.activity-mood-entry-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.activity-mood-entry-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
 @media (max-width: 768px) {
   .teacher-sidebar {
     display: none;

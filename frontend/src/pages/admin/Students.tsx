@@ -61,6 +61,8 @@ export function Students() {
     classId: ''
   })
 
+  const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>)=>{
     setFormData({...formData,[e.target.name]: e.target.value})
   }
@@ -68,13 +70,15 @@ export function Students() {
   const handleSubmit = async (e: React.FormEvent)=>{
     e.preventDefault();
     try {
-      console.log(formData)
       await api.post('/student',formData);
       const { data } = await api.get('/student')
       setStudents(data)
+      setFormMessage({ type: 'success', text: 'Student added successfully.' })
+      setFormData({ name: '', email: '', password: '', level: '', classId: classes[0]?.id ?? '' })
 
     } catch (err) {
       console.log("couldnt submit student", err)
+      setFormMessage({ type: 'error', text: 'Failed to add student.' })
     }
   }
 
@@ -154,19 +158,19 @@ console.log(students)
         <div className="form-grid">
           <div className="form-group">
             <label className="form-label">Full Name</label>
-            <input className="form-input" name='name'  type="text" placeholder="Enter student name" onChange={handleChange} />
+            <input className="form-input" name='name'  type="text" placeholder="Enter student name" onChange={handleChange} required />
           </div>
           <div className="form-group">
             <label className="form-label">Email</label>
-            <input className="form-input" name='email' type="email" placeholder="student@school.com" onChange={handleChange} />
+            <input className="form-input" name='email' type="email" placeholder="student@school.com" onChange={handleChange} required />
           </div>
           <div className="form-group">
             <label className="form-label">Password</label>
-            <input className="form-input" name='password' type="password" placeholder="Enter student's password" onChange={handleChange} />
+            <input className="form-input" name='password' type="password" placeholder="Enter student's password" onChange={handleChange} required />
           </div>
           <div className="form-group">
             <label className="form-label">Level</label>
-            <select className="form-select" name='level' onChange={handleChange}>
+            <select className="form-select" name='level' onChange={handleChange} required>
               <option value="">Select Level</option>
               <option value="Primary">Primary</option>
               <option value="Mid">Mid</option>
@@ -175,7 +179,7 @@ console.log(students)
           </div>
           <div className="form-group">
             <label className="form-label">Class</label>
-            <select name="classId" onChange={handleChange} className="form-select">
+            <select name="classId" onChange={handleChange} className="form-select" required>
               {classes.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
@@ -187,6 +191,9 @@ console.log(students)
           <button className="btn-secondary" type="button">Cancel</button>
           <button className="btn-primary" type="submit">Add Student</button>
         </div>
+        {formMessage && (
+          <div className={`form-message ${formMessage.type}`}>{formMessage.text}</div>
+        )}
       </form>
     </>
   )

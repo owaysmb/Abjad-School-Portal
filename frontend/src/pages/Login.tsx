@@ -61,6 +61,7 @@ export function LoginPage() {
                 id="email"
                 placeholder="you@example.com"
                 onChange={(e) => setEmail(e.target.value)}
+                required
                 />
             </div>
 
@@ -74,6 +75,7 @@ export function LoginPage() {
                 id="password"
                 placeholder="Enter your password"
                 onChange={(e) => setPassword(e.target.value)}
+                required
                 />
             </div>
 

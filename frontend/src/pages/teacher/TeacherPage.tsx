@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../api/axios'
-import type { TeacherJob, Student, MoodType } from '../../types'
+import type { TeacherJob, Student, MoodType, AttendanceEntry, GradeEntry, FeedbackEntry, MoodEntry } from '../../types'
 import './TeacherPage.css'
 import { useAuth } from '../../context/AuthContext'
 
-type Section = 'classes' | 'attendance' | 'feedback' | 'mood' | 'grades'
+type Section = 'classes' | 'attendance' | 'feedback' | 'mood' | 'grades' | 'activity'
+
+type ActivityTab = 'attendance' | 'grades' | 'feedback' | 'mood'
 
 const navItems: { key: Section; label: string; icon: string }[] = [
   { key: 'classes', label: 'My Classes', icon: '📚' },
@@ -13,6 +15,14 @@ const navItems: { key: Section; label: string; icon: string }[] = [
   { key: 'feedback', label: 'Add Feedback', icon: '📝' },
   { key: 'mood', label: 'Add Mood', icon: '🎭' },
   { key: 'grades', label: 'Add Grade', icon: '📊' },
+  { key: 'activity', label: 'My Activity', icon: '📈' },
+]
+
+const activityTabs: { key: ActivityTab; label: string }[] = [
+  { key: 'attendance', label: 'My Attendance' },
+  { key: 'grades', label: 'My Grades' },
+  { key: 'feedback', label: 'My Feedback' },
+  { key: 'mood', label: 'My Mood' },
 ]
 
 const sectionTitles: Record<Section, { title: string; subtitle: string }> = {
@@ -21,6 +31,32 @@ const sectionTitles: Record<Section, { title: string; subtitle: string }> = {
   feedback: { title: 'Add Feedback', subtitle: 'Write a note about a student' },
   mood: { title: 'Add Mood', subtitle: 'Record a student\'s mood' },
   grades: { title: 'Add Grade', subtitle: 'Enter a student\'s grade' },
+  activity: { title: 'My Activity', subtitle: 'Attendance, grades, feedback and mood you have recorded' },
+}
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+function formatDateTime(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function getScoreColor(score: number, maxScore: number) {
+  const ratio = score / maxScore
+  if (ratio >= 0.7) return 'activity-score-high'
+  if (ratio >= 0.5) return 'activity-score-medium'
+  return 'activity-score-low'
 }
 
 const moodOptions: MoodType[] = ['focused', 'tired', 'anxious', 'hyperactive', 'happy']
@@ -32,6 +68,13 @@ export function TeacherPage() {
   const [jobs, setJobs] = useState<TeacherJob[]>([])
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
+
+  const [activeActivityTab, setActiveActivityTab] = useState<ActivityTab>('attendance')
+  const [myAttendance, setMyAttendance] = useState<AttendanceEntry[]>([])
+  const [myGrades, setMyGrades] = useState<GradeEntry[]>([])
+  const [myFeedback, setMyFeedback] = useState<FeedbackEntry[]>([])
+  const [myMood, setMyMood] = useState<MoodEntry[]>([])
+  const [activityLoading, setActivityLoading] = useState(true)
 
   const [attForm, setAttForm] = useState({ studentId: '', classId: '', date: '', present: true })
   const [feedbackForm, setFeedbackForm] = useState({ studentId: '', note: '' })
@@ -65,6 +108,29 @@ export function TeacherPage() {
       }
     } 
     fetchData()
+  }, [])
+
+  useEffect(() => {
+    const fetchActivity = async () => {
+      setActivityLoading(true)
+      try {
+        const [attRes, gradesRes, feedbackRes, moodRes] = await Promise.all([
+          api.get('/teacher/attendance'),
+          api.get('/teacher/grades'),
+          api.get('/teacher/feedback'),
+          api.get('/teacher/mood'),
+        ])
+        setMyAttendance(attRes.data)
+        setMyGrades(gradesRes.data)
+        setMyFeedback(feedbackRes.data)
+        setMyMood(moodRes.data)
+      } catch {
+        console.error('Failed to fetch activity data')
+      } finally {
+        setActivityLoading(false)
+      }
+    }
+    fetchActivity()
   }, [])
 
 
@@ -131,6 +197,18 @@ export function TeacherPage() {
 
   const handleGradeSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const score = parseFloat(gradeForm.score)
+    const maxScore = parseFloat(gradeForm.maxScore)
+
+    if (isNaN(score) || score < 0 || score > 100) {
+      setFormMessage({ type: 'error', text: 'Score must be between 0 and 100.' })
+      return
+    }
+    if (isNaN(maxScore) || maxScore <= 0 || maxScore > 100) {
+      setFormMessage({ type: 'error', text: 'Max Score must be between 0 and 100.' })
+      return
+    }
+
     setSubmitting(true)
     setFormMessage(null)
     try {
@@ -138,8 +216,8 @@ export function TeacherPage() {
         studentId: gradeForm.studentId,
         classId: gradeForm.classId,
         subject: gradeForm.subject,
-        score: parseFloat(gradeForm.score),
-        maxScore: parseFloat(gradeForm.maxScore),
+        score,
+        maxScore,
         term: gradeForm.term,
       })
       setFormMessage({ type: 'success', text: 'Grade added successfully.' })
@@ -148,6 +226,120 @@ export function TeacherPage() {
       setFormMessage({ type: 'error', text: 'Failed to add grade.' })
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const renderActivityContent = () => {
+    switch (activeActivityTab) {
+      case 'attendance': {
+        const sorted = [...myAttendance].sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+        return (
+          <div className="activity-card">
+            {sorted.length === 0 ? (
+              <div className="teacher-empty">No attendance records yet.</div>
+            ) : (
+              <table className="activity-table">
+                <thead>
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sorted.map((a) => (
+                    <tr key={a.id}>
+                      <td>{a.student.user.name}</td>
+                      <td>{formatDate(a.date)}</td>
+                      <td>
+                        <span className={`activity-badge ${a.present ? 'activity-present' : 'activity-absent'}`}>
+                          {a.present ? 'Present' : 'Absent'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )
+      }
+
+      case 'grades':
+        return (
+          <div className="activity-card">
+            {myGrades.length === 0 ? (
+              <div className="teacher-empty">No grades recorded yet.</div>
+            ) : (
+              <table className="activity-table">
+                <thead>
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Subject</th>
+                    <th>Score</th>
+                    <th>Max Score</th>
+                    <th>Term</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {myGrades.map((g) => (
+                    <tr key={g.id}>
+                      <td>{g.student.user.name}</td>
+                      <td>{g.subject}</td>
+                      <td className={getScoreColor(g.score, g.maxScore)}>{g.score}</td>
+                      <td>{g.maxScore}</td>
+                      <td>{g.term}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )
+
+      case 'feedback': {
+        const sorted = [...myFeedback].sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+        return (
+          <div className="activity-feedback-feed">
+            {sorted.length === 0 ? (
+              <div className="teacher-empty">No feedback written yet.</div>
+            ) : (
+              sorted.map((item) => (
+                <div key={item.id} className="activity-feedback-card">
+                  <div className="activity-feedback-card-header">
+                    <span className="activity-feedback-student">{item.student.user.name}</span>
+                    <span className="activity-feedback-date">{formatDateTime(item.date)}</span>
+                  </div>
+                  <div className="activity-feedback-note">{item.note}</div>
+                </div>
+              ))
+            )}
+          </div>
+        )
+      }
+
+      case 'mood':
+        return (
+          <div className="activity-mood-timeline">
+            {myMood.length === 0 ? (
+              <div className="teacher-empty">No mood entries recorded yet.</div>
+            ) : (
+              myMood.map((item) => (
+                <div key={item.id} className="activity-mood-entry">
+                  <span className={`activity-mood-badge ${item.mood}`}>{item.mood}</span>
+                  <div className="activity-mood-entry-info">
+                    <div className="activity-mood-entry-student">{item.student.user.name}</div>
+                  </div>
+                  <span className="activity-mood-entry-date">{formatDate(item.date)}</span>
+                </div>
+              ))
+            )}
+          </div>
+        )
     }
   }
 
@@ -194,7 +386,7 @@ export function TeacherPage() {
                     <option value="">Select student</option>
                     {students.map((s) => (
                       <option key={s.id} value={s.id}>
-                        {s.user.name} ({s.class.name})
+                        {s.user.name} 
                       </option>
                     ))}
                   </select>
@@ -268,7 +460,7 @@ export function TeacherPage() {
                     <option value="">Select student</option>
                     {students.map((s) => (
                       <option key={s.id} value={s.id}>
-                        {s.user.name} ({s.class.name})
+                        {s.user.name} 
                       </option>
                     ))}
                   </select>
@@ -313,7 +505,7 @@ export function TeacherPage() {
                     <option value="">Select student</option>
                     {students.map((s) => (
                       <option key={s.id} value={s.id}>
-                        {s.user.name} ({s.class.name})
+                        {s.user.name} 
                       </option>
                     ))}
                   </select>
@@ -364,7 +556,7 @@ export function TeacherPage() {
                     <option value="">Select student</option>
                     {students.map((s) => (
                       <option key={s.id} value={s.id}>
-                        {s.user.name} ({s.class.name})
+                        {s.user.name} 
                       </option>
                     ))}
                   </select>
@@ -419,6 +611,7 @@ export function TeacherPage() {
                     type="number"
                     step="0.01"
                     min="0"
+                    max="100"
                     placeholder="0"
                     value={gradeForm.score}
                     onChange={(e) => setGradeForm({ ...gradeForm, score: e.target.value })}
@@ -432,6 +625,7 @@ export function TeacherPage() {
                     type="number"
                     step="0.01"
                     min="0.01"
+                    max="100"
                     placeholder="100"
                     value={gradeForm.maxScore}
                     onChange={(e) => setGradeForm({ ...gradeForm, maxScore: e.target.value })}
@@ -448,6 +642,28 @@ export function TeacherPage() {
                 <div className={`form-message ${formMessage.type}`}>{formMessage.text}</div>
               )}
             </form>
+          </div>
+        )
+
+      case 'activity':
+        return (
+          <div>
+            <div className="activity-tabs">
+              {activityTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  className={`activity-tab ${activeActivityTab === tab.key ? 'active' : ''}`}
+                  onClick={() => setActiveActivityTab(tab.key)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            {activityLoading ? (
+              <div className="teacher-loading">Loading...</div>
+            ) : (
+              renderActivityContent()
+            )}
           </div>
         )
     }

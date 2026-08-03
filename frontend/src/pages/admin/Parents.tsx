@@ -61,6 +61,9 @@ export function Parents() {
     studentId: ''
   })
 
+  const [addParentMsg, setAddParentMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [assignMsg, setAssignMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
   const [students, setStudents] = useState<Student[]>([])
 
   useEffect(() => {
@@ -91,8 +94,11 @@ export function Parents() {
         await api.post('/parent/assign', assignData)
         const { data } = await api.get('/parent')
         setParents(data)
+        setAssignMsg({ type: 'success', text: 'Child assigned to parent successfully.' })
+        setAssignData({ parentId: parents[0]?.id ?? '', studentId: students[0]?.id ?? '' })
       } catch (err) {
         console.log(err)
+        setAssignMsg({ type: 'error', text: 'Failed to assign child.' })
       }
     }
 
@@ -109,9 +115,12 @@ export function Parents() {
       await api.post("/parent",addParent)
       const {data} = await api.get('/parent');
       setParents(data);
+      setAddParentMsg({ type: 'success', text: 'Parent added successfully.' })
+      setAddParent({ name: "", email: "", password: "" })
 
     } catch (err) {
       console.log(err);
+      setAddParentMsg({ type: 'error', text: 'Failed to add parent.' })
     }
   }
 
@@ -170,15 +179,15 @@ export function Parents() {
         <div className="form-grid">
           <div className="form-group">
             <label className="form-label">Full Name</label>
-            <input className="form-input" name='name' type="text" placeholder="Enter parent name" onChange={handleAddParent} />
+            <input className="form-input" name='name' type="text" placeholder="Enter parent name" onChange={handleAddParent} required />
           </div>
           <div className="form-group">
             <label className="form-label">Email</label>
-            <input className="form-input" name='email' type="email" placeholder="parent@email.com" onChange={handleAddParent} />
+            <input className="form-input" name='email' type="email" placeholder="parent@email.com" onChange={handleAddParent} required />
           </div>
           <div className="form-group">
             <label className="form-label">Password</label>
-            <input className="form-input" name='password' type="password" placeholder="Enter Password" onChange={handleAddParent} />
+            <input className="form-input" name='password' type="password" placeholder="Enter Password" onChange={handleAddParent} required />
           </div>
 
         </div>
@@ -186,6 +195,9 @@ export function Parents() {
           <button className="btn-secondary" type="button">Cancel</button>
           <button className="btn-primary" type="submit">Add Parent</button>
         </div>
+        {addParentMsg && (
+          <div className={`form-message ${addParentMsg.type}`}>{addParentMsg.text}</div>
+        )}
       </div>
     </form>
       
@@ -196,7 +208,7 @@ export function Parents() {
           <h3 className="form-title">Assign a Parent</h3>
           <div className="form-group">
               <label className="form-label">Parent </label>
-              <select className="form-select" name="parentId" onChange={handleAssignChange}>
+              <select className="form-select" name="parentId" onChange={handleAssignChange} required>
               {parents.map((parent) => (
                 <option key={parent.id} value={parent.id}>
                   {parent.user?.name}
@@ -207,7 +219,7 @@ export function Parents() {
             <br />
             <div className="form-group">
               <label className="form-label">Children</label>
-              <select className="form-select" name="studentId" onChange={handleAssignChange}>
+              <select className="form-select" name="studentId" onChange={handleAssignChange} required>
                 {students.map((student) => (
                   <option key={student.id} value={student.id}>
                     {student.user?.name}
@@ -219,6 +231,9 @@ export function Parents() {
             <button className="btn-secondary" type="button">Cancel</button>
             <button className="btn-primary" type="submit">Assign</button>
           </div>
+          {assignMsg && (
+            <div className={`form-message ${assignMsg.type}`}>{assignMsg.text}</div>
+          )}
         </div>
     </form>
       

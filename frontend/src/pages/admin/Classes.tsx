@@ -64,6 +64,8 @@ export function Classes() {
     level:""
   })
 
+  const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
 
 
   useEffect(()=>{
@@ -87,9 +89,12 @@ export function Classes() {
       await api.post("/classes",addClass);
       const {data} = await api.get("/classes")
       setClasses(data);
+      setFormMessage({ type: 'success', text: 'Class added successfully.' })
+      setAddClass({ name: "", level: "" })
 
     } catch (err) {
       console.log(err);
+      setFormMessage({ type: 'error', text: 'Failed to add class.' })
     }
   }
 
@@ -144,13 +149,13 @@ export function Classes() {
           <div className="form-grid">
             <div className="form-group">
               <label className="form-label">Class Name</label>
-              <input className="form-input" name='name' type="text" placeholder="e.g. Class D"  onChange={handleAddClass}/>
+              <input className="form-input" name='name' type="text" placeholder="e.g. Class D"  onChange={handleAddClass} required/>
             </div>
 
 
             <div className="form-group">
               <label className="form-label">Level</label>
-              <select className="form-select" name='level' onChange={handleAddClass} >
+              <select className="form-select" name='level' onChange={handleAddClass} required>
                 <option value="">Select Level</option>
                 <option value="Primary">Primary</option>
                 <option value="Mid">Mid</option>
@@ -162,6 +167,9 @@ export function Classes() {
             <button className="btn-secondary" type="button">Cancel</button>
             <button className="btn-primary" type="submit">Add Class</button>
           </div>
+          {formMessage && (
+            <div className={`form-message ${formMessage.type}`}>{formMessage.text}</div>
+          )}
         </div>
       </form> 
 

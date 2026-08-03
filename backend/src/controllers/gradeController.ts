@@ -157,3 +157,24 @@ export const getMyChildrenGrades = async (req: AuthRequest, res: Response) => {
         res.status(500).json({ message: "Error getting children's grades" })
     }
 }
+
+
+export const updateGrade = async (req:AuthRequest,res:Response) =>{
+    try {
+        
+        const id = req.params?.id as string
+        const {score,maxScore,subject,term} = req.body;
+
+        const grade = await prisma.grade.update({
+            where:{id},
+            data:{score,maxScore,subject,term}
+        })
+
+        res.json(grade)
+
+
+    } catch (err) {
+        res.status(500).json({message:"Error Updating Grades"})
+        console.log(err);
+    }
+}

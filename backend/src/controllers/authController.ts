@@ -121,3 +121,22 @@ export const getMe = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ message: 'Error getting user' })
   }
 }
+
+export const resetPassword = async (req:AuthRequest,res:Response) =>{
+    try {
+        const {userId  , newPassword} = req.body;
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10)
+        
+        await prisma.user.update({
+            where:{id:userId},
+            data:{password:hashedPassword}
+        })
+
+        res.json({ message: 'Password reset successfully' })
+
+    } catch (err) {
+        res.status(500).json({message:"Error Reset Password"})
+        console.log(err);
+    }
+}
