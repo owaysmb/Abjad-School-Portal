@@ -130,3 +130,149 @@ export const deleteTeacher = async (req:Request,res:Response)=>{
     res.status(500).json({message:"Error Deleting Teacher"})
   }
 }
+
+
+export const getMyAttendance = async (req: AuthRequest, res: Response) => {
+  try {
+    const id = req.user?.id as string
+
+    const teacher = await prisma.teacher.findUnique({ where: { userId: id } })
+
+    if (!teacher) {
+      res.status(400).json({ message: 'Teacher not found' })
+      return
+    }
+
+    const attendance = await prisma.attendance.findMany({
+      where: { teacherId: teacher.id },
+      include: {
+        student: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { date: 'desc' }
+    })
+
+    res.json(attendance)
+
+  } catch (err) {
+    res.status(500).json({ message: 'Error getting attendance' })
+    console.log(err)
+  }
+}
+
+export const getMyGrades = async (req: AuthRequest, res: Response) => {
+  try {
+    const id = req.user?.id as string
+
+    const teacher = await prisma.teacher.findUnique({ where: { userId: id } })
+
+    if (!teacher) {
+      res.status(400).json({ message: 'Teacher not found' })
+      return
+    }
+
+    const grades = await prisma.grade.findMany({
+      where: { teacherId: teacher.id },
+      include: {
+        student: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    res.json(grades)
+
+  } catch (err) {
+    res.status(500).json({ message: 'Error getting Grades' })
+    console.log(err)
+  }
+}
+
+export const getMyfeedback = async (req: AuthRequest, res: Response) => {
+  try {
+    const id = req.user?.id as string
+
+    const teacher = await prisma.teacher.findUnique({ where: { userId: id } })
+
+    if (!teacher) {
+      res.status(400).json({ message: 'Teacher not found' })
+      return
+    }
+
+    const grades = await prisma.feedback.findMany({
+      where: { teacherId: teacher.id },
+      include: {
+        student: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { date: 'desc' }
+    })
+
+    res.json(grades)
+
+  } catch (err) {
+    res.status(500).json({ message: 'Error getting Feedback' })
+    console.log(err)
+  }
+}
+
+
+export const getMyMood = async (req: AuthRequest, res: Response) => {
+  try {
+    const id = req.user?.id as string
+
+    const teacher = await prisma.teacher.findUnique({ where: { userId: id } })
+
+    if (!teacher) {
+      res.status(400).json({ message: 'Teacher not found' })
+      return
+    }
+
+    const grades = await prisma.mood.findMany({
+      where: { teacherId: teacher.id },
+      include: {
+        student: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { date: 'desc' }
+    })
+
+    res.json(grades)
+
+  } catch (err) {
+    res.status(500).json({ message: 'Error getting Mood' })
+    console.log(err)
+  }
+}

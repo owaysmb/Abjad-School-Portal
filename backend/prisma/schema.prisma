@@ -15,9 +15,9 @@ model User {
   role      Role
   createdAt DateTime @default(now())
 
-  failedLoginAttempts  Int       @default(0)
-  lockUntil            DateTime?
-  
+  failedLoginAttempts Int       @default(0)
+  lockUntil           DateTime?
+
   teacher Teacher?
   student Student?
   parent  Parent?
@@ -38,6 +38,7 @@ model Teacher {
   attendance Attendance[]
   Feedback   Feedback[]
   Mood       Mood[]
+  grades      Grade[]
 }
 
 model Student {
@@ -113,6 +114,9 @@ model Grade {
   class     Class    @relation(fields: [classId], references: [id])
   classId   String
   createdAt DateTime @default(now())
+
+  teacherId String?
+  teacher   Teacher? @relation(fields: [teacherId], references: [id])
 }
 
 model Announcement {

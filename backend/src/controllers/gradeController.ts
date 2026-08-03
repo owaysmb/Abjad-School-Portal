@@ -15,6 +15,16 @@ export const addGrade = async (req:AuthRequest,res:Response) =>{
             return
         }
         
+        const teacher = await prisma.teacher.findUnique({
+                where: { userId: req.user.id }
+        })
+
+        if (!teacher) {
+            res.status(404).json({ message: 'Teacher not found' })
+            return
+        }
+
+        
         const grades = await prisma.grade.create({
             data:{
                 studentId,
@@ -23,6 +33,7 @@ export const addGrade = async (req:AuthRequest,res:Response) =>{
                 score,
                 maxScore,
                 term,
+                teacherId: teacher.id
             }
         })
 

@@ -30,7 +30,7 @@ export function Overview() {
       })
     }
     fetchStats();
-  })
+  },[])
 
 
 

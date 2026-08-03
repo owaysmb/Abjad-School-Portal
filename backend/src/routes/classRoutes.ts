@@ -4,7 +4,7 @@ import { createClass, getAllClasses,deleteClass } from "../controllers/classCont
 
 const router = express.Router();
 router.post('/', protect, authorize('ADMIN'), createClass);
-router.get('/',protect,getAllClasses)
+router.get('/',protect, authorize('ADMIN', 'TEACHER'),getAllClasses)
 router.delete('/:id', protect, authorize('ADMIN'), deleteClass) 
 
 export default router
