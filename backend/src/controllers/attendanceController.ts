@@ -156,6 +156,29 @@ export const getMyChildrenAttendance = async (req: AuthRequest, res: Response) =
     }
 }
 
+export const getAllAttendance = async (req: Request, res: Response) => {
+    try {
+        const attendance = await prisma.attendance.findMany({
+            include: {
+                teacher: {
+                    include: {
+                        user: { select: { name: true } }
+                    }
+                },
+                student: {
+                    include: {
+                        user: { select: { name: true } }
+                    }
+                }
+            },
+            orderBy: { date: 'desc' }
+        })
+        res.json(attendance)
+    } catch (err) {
+        res.status(500).json({ message: "Error getting all attendance" })
+    }
+}
+
 export const updateAttendance = async (req:AuthRequest,res:Response) =>{
     try {
 

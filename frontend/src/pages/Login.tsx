@@ -79,7 +79,7 @@ export function LoginPage() {
                 />
             </div>
 
-            <div className="login-options">
+            {/* <div className="login-options">
                 <label className="login-remember">
                 <input type="checkbox" />
                 Remember me
@@ -87,7 +87,7 @@ export function LoginPage() {
                 <a className="login-forgot" href="#">
                 Forgot password?
                 </a>
-            </div>
+            </div> */}
 
             <button className="login-button" type="submit">
                 Sign in

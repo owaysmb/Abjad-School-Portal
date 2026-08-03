@@ -67,6 +67,29 @@ export const getStudentMood = async (req:Request,res:Response) =>{
 }
 
 
+export const getAllMood = async (req: Request, res: Response) => {
+    try {
+        const moods = await prisma.mood.findMany({
+            include: {
+                teacher: {
+                    include: {
+                        user: { select: { name: true } }
+                    }
+                },
+                student: {
+                    include: {
+                        user: { select: { name: true } }
+                    }
+                }
+            },
+            orderBy: { date: 'desc' }
+        })
+        res.json(moods)
+    } catch (err) {
+        res.status(500).json({ message: "Error getting all moods" })
+    }
+}
+
 export const getMyChildMood = async (req:AuthRequest,res:Response) =>{
     try {
         
@@ -119,5 +142,40 @@ export const getMyChildMood = async (req:AuthRequest,res:Response) =>{
     } catch (err) {
         res.status(500).json({message:"Error Getting child's parent Mood"})
         console.log(err);
+    }
+}
+
+
+export const moodUpdate = async (req:Request,res:Response) =>{
+    try {
+
+        const id = req.params.id as string;
+        const {mood} = req.body;
+
+        const newMood = await prisma.mood.update({
+            where:{id},
+            data:{mood}
+        })
+
+        res.json(newMood);
+        
+    } catch (err) {
+        res.status(500).json({message:"Eroor Updating Mood"})
+    }
+}
+
+export const deleteMood = async (req:Request,res:Response) =>{
+    try {
+
+        const id = req.params.id as string;
+
+        const mood = await prisma.mood.delete({
+            where:{id}
+        })
+
+        res.json(mood);
+        
+    } catch (err) {
+        res.status(500).json({message:"Eroor Deleting Mood"})
     }
 }

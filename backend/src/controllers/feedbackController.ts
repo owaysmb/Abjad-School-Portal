@@ -72,6 +72,29 @@ export const getStudentFeedback = async (req:Request,res:Response) =>{
     }
 }
 
+export const getAllFeedback = async (req: Request, res: Response) => {
+    try {
+        const feedback = await prisma.feedback.findMany({
+            include: {
+                teacher: {
+                    include: {
+                        user: { select: { name: true } }
+                    }
+                },
+                student: {
+                    include: {
+                        user: { select: { name: true } }
+                    }
+                }
+            },
+            orderBy: { date: 'desc' }
+        })
+        res.json(feedback)
+    } catch (err) {
+        res.status(500).json({ message: "Error getting all feedback" })
+    }
+}
+
 export const getMyChildFeedback = async (req:AuthRequest,res:Response)=>{
     try {
         
@@ -122,5 +145,43 @@ export const getMyChildFeedback = async (req:AuthRequest,res:Response)=>{
     } catch (err) {
         res.status(500).json({message:"Error Getting Feedback"})
         console.log(err)
+    }
+}
+
+
+export const feedbackUpdate = async (req:Request,res:Response) =>{
+    try {
+
+        const id = req.params.id as string;
+        const {note} = req.body;
+
+        const feedback = await prisma.feedback.update({
+            where:{id},
+            data:{note}
+        })
+
+        res.json(feedback);
+
+
+        
+    } catch (err) {
+        res.status(500).json({message:"Eroor Updating Feedback"})
+    }
+}
+
+
+export const deleteFeedback = async (req:Request,res:Response) =>{
+    try {
+
+        const id = req.params.id as string;
+
+        const feedback = await prisma.feedback.delete({
+            where:{id}
+        })
+
+        res.json(feedback);
+        
+    } catch (err) {
+        res.status(500).json({message:"Eroor Deleting Feedback"})
     }
 }

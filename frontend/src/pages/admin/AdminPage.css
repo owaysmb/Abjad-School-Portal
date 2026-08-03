@@ -463,3 +463,112 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Reset Password */
+.reset-password-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.reset-password-form .form-input {
+  width: 150px;
+}
+
+.reset-password-btn {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #F5EDD6;
+  background-color: #8B5E2A;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+.reset-password-btn:hover {
+  background-color: #6E4A21;
+}
+
+/* Activity Log */
+.activity-log-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.activity-log-tab {
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #5C4A2A;
+  background-color: #FAF5E8;
+  border: 1px solid #C4A882;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.activity-log-tab:hover {
+  background-color: rgba(212, 197, 169, 0.25);
+}
+
+.activity-log-tab.active {
+  background-color: #5C7A2A;
+  border-color: #5C7A2A;
+  color: #F5EDD6;
+}
+
+.activity-log-mood-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.activity-log-mood-badge.focused {
+  background-color: rgba(107, 124, 75, 0.15);
+  color: var(--mood-focused);
+}
+
+.activity-log-mood-badge.tired {
+  background-color: rgba(196, 163, 90, 0.2);
+  color: #8B7332;
+}
+
+.activity-log-mood-badge.anxious {
+  background-color: rgba(196, 122, 58, 0.15);
+  color: var(--mood-anxious);
+}
+
+.activity-log-mood-badge.hyperactive {
+  background-color: rgba(184, 85, 45, 0.15);
+  color: #B8552D;
+}
+
+.activity-log-mood-badge.happy {
+  background-color: rgba(122, 154, 90, 0.15);
+  color: var(--mood-happy);
+}
+
+.activity-log-score {
+  font-weight: 600;
+}
+
+.activity-log-score-high {
+  color: #3D6428;
+}
+
+.activity-log-score-medium {
+  color: #B5651D;
+}
+
+.activity-log-score-low {
+  color: #8B2A1A;
+}

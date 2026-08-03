@@ -61,6 +61,14 @@ function getScoreColor(score: number, maxScore: number) {
 
 const moodOptions: MoodType[] = ['focused', 'tired', 'anxious', 'hyperactive', 'happy']
 
+const subjectLabels: Record<string, string> = {
+  math: 'Mathematics',
+  english: 'English',
+  science: 'Science',
+  history: 'History',
+  arabic: 'Arabic',
+}
+
 export function TeacherPage() {
   const [activeSection, setActiveSection] = useState<Section>('classes')
   const navigate = useNavigate()
@@ -75,6 +83,16 @@ export function TeacherPage() {
   const [myFeedback, setMyFeedback] = useState<FeedbackEntry[]>([])
   const [myMood, setMyMood] = useState<MoodEntry[]>([])
   const [activityLoading, setActivityLoading] = useState(true)
+
+  const [editingGradeId, setEditingGradeId] = useState<string | null>(null)
+  const [gradeEditForm, setGradeEditForm] = useState({ subject: '', score: '', maxScore: '', term: '' })
+  const [editingAttendanceId, setEditingAttendanceId] = useState<string | null>(null)
+  const [attendanceEditPresent, setAttendanceEditPresent] = useState(true)
+  const [editingFeedbackId, setEditingFeedbackId] = useState<string | null>(null)
+  const [feedbackEditNote, setFeedbackEditNote] = useState('')
+  const [editingMoodId, setEditingMoodId] = useState<string | null>(null)
+  const [moodEditValue, setMoodEditValue] = useState<MoodType>('focused')
+  const [editMessage, setEditMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const [attForm, setAttForm] = useState({ studentId: '', classId: '', date: '', present: true })
   const [feedbackForm, setFeedbackForm] = useState({ studentId: '', note: '' })
@@ -229,6 +247,157 @@ export function TeacherPage() {
     }
   }
 
+  const refreshGrades = async () => {
+    try {
+      const { data } = await api.get('/teacher/grades')
+      setMyGrades(data)
+    } catch {
+      console.error('Failed to refresh grades')
+    }
+  }
+
+  const refreshAttendance = async () => {
+    try {
+      const { data } = await api.get('/teacher/attendance')
+      setMyAttendance(data)
+    } catch {
+      console.error('Failed to refresh attendance')
+    }
+  }
+
+  const startGradeEdit = (g: GradeEntry) => {
+    setEditMessage(null)
+    setEditingGradeId(g.id)
+    setGradeEditForm({ subject: g.subject, score: String(g.score), maxScore: String(g.maxScore), term: g.term })
+  }
+
+  const handleGradeEditSave = async (id: string) => {
+    const score = parseFloat(gradeEditForm.score)
+    const maxScore = parseFloat(gradeEditForm.maxScore)
+
+    if (isNaN(score) || score < 0 || score > 100) {
+      setEditMessage({ type: 'error', text: 'Score must be between 0 and 100.' })
+      return
+    }
+    if (isNaN(maxScore) || maxScore <= 0 || maxScore > 100) {
+      setEditMessage({ type: 'error', text: 'Max Score must be between 0 and 100.' })
+      return
+    }
+    if (!gradeEditForm.subject || !gradeEditForm.term.trim()) {
+      setEditMessage({ type: 'error', text: 'Subject and Term are required.' })
+      return
+    }
+
+    try {
+      await api.put(`/grade/${id}`, {
+        subject: gradeEditForm.subject,
+        score,
+        maxScore,
+        term: gradeEditForm.term.trim(),
+      })
+      setEditMessage({ type: 'success', text: 'Grade updated successfully.' })
+      setEditingGradeId(null)
+      refreshGrades()
+    } catch {
+      setEditMessage({ type: 'error', text: 'Failed to update grade.' })
+    }
+  }
+
+  const startAttendanceEdit = (a: AttendanceEntry) => {
+    setEditMessage(null)
+    setEditingAttendanceId(a.id)
+    setAttendanceEditPresent(a.present)
+  }
+
+  const handleAttendanceEditSave = async (id: string) => {
+    try {
+      await api.put(`/attendance/${id}`, { present: attendanceEditPresent })
+      setEditMessage({ type: 'success', text: 'Attendance updated successfully.' })
+      setEditingAttendanceId(null)
+      refreshAttendance()
+    } catch {
+      setEditMessage({ type: 'error', text: 'Failed to update attendance.' })
+    }
+  }
+
+  const refreshFeedback = async () => {
+    try {
+      const { data } = await api.get('/teacher/feedback')
+      setMyFeedback(data)
+    } catch {
+      console.error('Failed to refresh feedback')
+    }
+  }
+
+  const refreshMood = async () => {
+    try {
+      const { data } = await api.get('/teacher/mood')
+      setMyMood(data)
+    } catch {
+      console.error('Failed to refresh mood')
+    }
+  }
+
+  const startFeedbackEdit = (f: FeedbackEntry) => {
+    setEditMessage(null)
+    setEditingFeedbackId(f.id)
+    setFeedbackEditNote(f.note)
+  }
+
+  const handleFeedbackEditSave = async (id: string) => {
+    if (!feedbackEditNote.trim()) {
+      setEditMessage({ type: 'error', text: 'Feedback note is required.' })
+      return
+    }
+    try {
+      await api.put(`/feedback/${id}`, { note: feedbackEditNote.trim() })
+      setEditMessage({ type: 'success', text: 'Feedback updated successfully.' })
+      setEditingFeedbackId(null)
+      refreshFeedback()
+    } catch {
+      setEditMessage({ type: 'error', text: 'Failed to update feedback.' })
+    }
+  }
+
+  const handleFeedbackDelete = async (f: FeedbackEntry) => {
+    try {
+      await api.delete(`/feedback/${f.id}`)
+      setEditMessage({ type: 'success', text: 'Feedback deleted successfully.' })
+      setEditingFeedbackId(null)
+      refreshFeedback()
+    } catch {
+      setEditMessage({ type: 'error', text: 'Failed to delete feedback.' })
+    }
+  }
+
+  const startMoodEdit = (m: MoodEntry) => {
+    setEditMessage(null)
+    setEditingMoodId(m.id)
+    setMoodEditValue(m.mood as MoodType)
+  }
+
+  const handleMoodEditSave = async (id: string) => {
+    try {
+      await api.put(`/mood/${id}`, { mood: moodEditValue })
+      setEditMessage({ type: 'success', text: 'Mood updated successfully.' })
+      setEditingMoodId(null)
+      refreshMood()
+    } catch {
+      setEditMessage({ type: 'error', text: 'Failed to update mood.' })
+    }
+  }
+
+  const handleMoodDelete = async (m: MoodEntry) => {
+    try {
+      await api.delete(`/mood/${m.id}`)
+      setEditMessage({ type: 'success', text: 'Mood deleted successfully.' })
+      setEditingMoodId(null)
+      refreshMood()
+    } catch {
+      setEditMessage({ type: 'error', text: 'Failed to delete mood.' })
+    }
+  }
+
   const renderActivityContent = () => {
     switch (activeActivityTab) {
       case 'attendance': {
@@ -237,6 +406,9 @@ export function TeacherPage() {
         )
         return (
           <div className="activity-card">
+            {editMessage && (
+              <div className={`form-message ${editMessage.type}`}>{editMessage.text}</div>
+            )}
             {sorted.length === 0 ? (
               <div className="teacher-empty">No attendance records yet.</div>
             ) : (
@@ -246,20 +418,62 @@ export function TeacherPage() {
                     <th>Student Name</th>
                     <th>Date</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {sorted.map((a) => (
-                    <tr key={a.id}>
-                      <td>{a.student.user.name}</td>
-                      <td>{formatDate(a.date)}</td>
-                      <td>
-                        <span className={`activity-badge ${a.present ? 'activity-present' : 'activity-absent'}`}>
-                          {a.present ? 'Present' : 'Absent'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {sorted.map((a) =>
+                    editingAttendanceId === a.id ? (
+                      <tr key={a.id}>
+                        <td>{a.student.user.name}</td>
+                        <td>{formatDate(a.date)}</td>
+                        <td>
+                          <div className="activity-attendance-edit">
+                            <label className="toggle">
+                              <input
+                                type="checkbox"
+                                checked={attendanceEditPresent}
+                                onChange={(e) => setAttendanceEditPresent(e.target.checked)}
+                              />
+                              <span className="toggle-slider"></span>
+                            </label>
+                            <span className="toggle-label">
+                              {attendanceEditPresent ? 'Present' : 'Absent'}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="activity-actions-cell">
+                          <button
+                            className="activity-edit-btn save"
+                            onClick={() => handleAttendanceEditSave(a.id)}
+                          >
+                            Save
+                          </button>
+                          <button
+                            className="activity-edit-btn cancel"
+                            onClick={() => { setEditingAttendanceId(null); setEditMessage(null) }}
+                          >
+                            Cancel
+                          </button>
+                        </td>
+                      </tr>
+                    ) : (
+                      <tr key={a.id}>
+                        <td>{a.student.user.name}</td>
+                        <td>{formatDate(a.date)}</td>
+                        <td>
+                          <span className={`activity-badge ${a.present ? 'activity-present' : 'activity-absent'}`}>
+                            {a.present ? 'Present' : 'Absent'}
+                          </span>
+                        </td>
+                        <td className="activity-actions-cell">
+                          <button className="activity-edit-btn" onClick={() => startAttendanceEdit(a)}>
+                            Edit
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             )}
@@ -270,6 +484,9 @@ export function TeacherPage() {
       case 'grades':
         return (
           <div className="activity-card">
+            {editMessage && (
+              <div className={`form-message ${editMessage.type}`}>{editMessage.text}</div>
+            )}
             {myGrades.length === 0 ? (
               <div className="teacher-empty">No grades recorded yet.</div>
             ) : (
@@ -281,18 +498,86 @@ export function TeacherPage() {
                     <th>Score</th>
                     <th>Max Score</th>
                     <th>Term</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {myGrades.map((g) => (
-                    <tr key={g.id}>
-                      <td>{g.student.user.name}</td>
-                      <td>{g.subject}</td>
-                      <td className={getScoreColor(g.score, g.maxScore)}>{g.score}</td>
-                      <td>{g.maxScore}</td>
-                      <td>{g.term}</td>
-                    </tr>
-                  ))}
+                  {myGrades.map((g) =>
+                    editingGradeId === g.id ? (
+                      <tr key={g.id}>
+                        <td>{g.student.user.name}</td>
+                        <td>
+                          <select
+                            className="activity-edit-input"
+                            value={gradeEditForm.subject}
+                            onChange={(e) => setGradeEditForm({ ...gradeEditForm, subject: e.target.value })}
+                          >
+                            <option value="">Select subject</option>
+                            {Object.entries(subjectLabels).map(([value, label]) => (
+                              <option key={value} value={value}>{label}</option>
+                            ))}
+                          </select>
+                        </td>
+                        <td>
+                          <input
+                            className="activity-edit-input activity-edit-small"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={gradeEditForm.score}
+                            onChange={(e) => setGradeEditForm({ ...gradeEditForm, score: e.target.value })}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            className="activity-edit-input activity-edit-small"
+                            type="number"
+                            step="0.01"
+                            min="0.01"
+                            max="100"
+                            value={gradeEditForm.maxScore}
+                            onChange={(e) => setGradeEditForm({ ...gradeEditForm, maxScore: e.target.value })}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            className="activity-edit-input"
+                            type="text"
+                            value={gradeEditForm.term}
+                            onChange={(e) => setGradeEditForm({ ...gradeEditForm, term: e.target.value })}
+                          />
+                        </td>
+                        <td className="activity-actions-cell">
+                          <button
+                            className="activity-edit-btn save"
+                            onClick={() => handleGradeEditSave(g.id)}
+                          >
+                            Save
+                          </button>
+                          <button
+                            className="activity-edit-btn cancel"
+                            onClick={() => { setEditingGradeId(null); setEditMessage(null) }}
+                          >
+                            Cancel
+                          </button>
+                        </td>
+                      </tr>
+                    ) : (
+                      <tr key={g.id}>
+                        <td>{g.student.user.name}</td>
+                        <td>{subjectLabels[g.subject] ?? g.subject}</td>
+                        <td className={getScoreColor(g.score, g.maxScore)}>{g.score}</td>
+                        <td>{g.maxScore}</td>
+                        <td>{g.term}</td>
+                        <td className="activity-actions-cell">
+                          <button className="activity-edit-btn" onClick={() => startGradeEdit(g)}>
+                            Edit
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             )}
@@ -305,18 +590,54 @@ export function TeacherPage() {
         )
         return (
           <div className="activity-feedback-feed">
+            {editMessage && (
+              <div className={`form-message ${editMessage.type}`}>{editMessage.text}</div>
+            )}
             {sorted.length === 0 ? (
               <div className="teacher-empty">No feedback written yet.</div>
             ) : (
-              sorted.map((item) => (
-                <div key={item.id} className="activity-feedback-card">
-                  <div className="activity-feedback-card-header">
-                    <span className="activity-feedback-student">{item.student.user.name}</span>
-                    <span className="activity-feedback-date">{formatDateTime(item.date)}</span>
+              sorted.map((item) =>
+                editingFeedbackId === item.id ? (
+                  <div key={item.id} className="activity-feedback-card">
+                    <div className="activity-feedback-card-header">
+                      <span className="activity-feedback-student">{item.student.user.name}</span>
+                      <span className="activity-feedback-date">{formatDateTime(item.date)}</span>
+                    </div>
+                    <textarea
+                      className="activity-edit-input activity-feedback-edit"
+                      value={feedbackEditNote}
+                      onChange={(e) => setFeedbackEditNote(e.target.value)}
+                    />
+                    <div className="activity-edit-actions">
+                      <button className="activity-edit-btn save" onClick={() => handleFeedbackEditSave(item.id)}>
+                        Save
+                      </button>
+                      <button
+                        className="activity-edit-btn cancel"
+                        onClick={() => { setEditingFeedbackId(null); setEditMessage(null) }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
-                  <div className="activity-feedback-note">{item.note}</div>
-                </div>
-              ))
+                ) : (
+                  <div key={item.id} className="activity-feedback-card">
+                    <div className="activity-feedback-card-header">
+                      <span className="activity-feedback-student">{item.student.user.name}</span>
+                      <span className="activity-feedback-date">{formatDateTime(item.date)}</span>
+                    </div>
+                    <div className="activity-feedback-note">{item.note}</div>
+                    <div className="activity-edit-actions">
+                      <button className="activity-edit-btn" onClick={() => startFeedbackEdit(item)}>
+                        Edit
+                      </button>
+                      <button className="activity-edit-btn delete" onClick={() => handleFeedbackDelete(item)}>
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                )
+              )
             )}
           </div>
         )
@@ -325,18 +646,60 @@ export function TeacherPage() {
       case 'mood':
         return (
           <div className="activity-mood-timeline">
+            {editMessage && (
+              <div className={`form-message ${editMessage.type}`}>{editMessage.text}</div>
+            )}
             {myMood.length === 0 ? (
               <div className="teacher-empty">No mood entries recorded yet.</div>
             ) : (
-              myMood.map((item) => (
-                <div key={item.id} className="activity-mood-entry">
-                  <span className={`activity-mood-badge ${item.mood}`}>{item.mood}</span>
-                  <div className="activity-mood-entry-info">
-                    <div className="activity-mood-entry-student">{item.student.user.name}</div>
+              myMood.map((item) =>
+                editingMoodId === item.id ? (
+                  <div key={item.id} className="activity-mood-entry">
+                    <div className="activity-mood-entry-info">
+                      <div className="activity-mood-entry-student">{item.student.user.name}</div>
+                    </div>
+                    <select
+                      className="activity-edit-input"
+                      value={moodEditValue}
+                      onChange={(e) => setMoodEditValue(e.target.value as MoodType)}
+                    >
+                      {moodOptions.map((m) => (
+                        <option key={m} value={m}>
+                          {m.charAt(0).toUpperCase() + m.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="activity-mood-entry-date">{formatDate(item.date)}</span>
+                    <div className="activity-edit-actions">
+                      <button className="activity-edit-btn save" onClick={() => handleMoodEditSave(item.id)}>
+                        Save
+                      </button>
+                      <button
+                        className="activity-edit-btn cancel"
+                        onClick={() => { setEditingMoodId(null); setEditMessage(null) }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
-                  <span className="activity-mood-entry-date">{formatDate(item.date)}</span>
-                </div>
-              ))
+                ) : (
+                  <div key={item.id} className="activity-mood-entry">
+                    <span className={`activity-mood-badge ${item.mood}`}>{item.mood}</span>
+                    <div className="activity-mood-entry-info">
+                      <div className="activity-mood-entry-student">{item.student.user.name}</div>
+                    </div>
+                    <span className="activity-mood-entry-date">{formatDate(item.date)}</span>
+                    <div className="activity-edit-actions">
+                      <button className="activity-edit-btn" onClick={() => startMoodEdit(item)}>
+                        Edit
+                      </button>
+                      <button className="activity-edit-btn delete" onClick={() => handleMoodDelete(item)}>
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                )
+              )
             )}
           </div>
         )

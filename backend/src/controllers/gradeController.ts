@@ -159,6 +159,29 @@ export const getMyChildrenGrades = async (req: AuthRequest, res: Response) => {
 }
 
 
+export const getAllGrades = async (req: Request, res: Response) => {
+    try {
+        const grades = await prisma.grade.findMany({
+            include: {
+                teacher: {
+                    include: {
+                        user: { select: { name: true } }
+                    }
+                },
+                student: {
+                    include: {
+                        user: { select: { name: true } }
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        })
+        res.json(grades)
+    } catch (err) {
+        res.status(500).json({ message: "Error getting all grades" })
+    }
+}
+
 export const updateGrade = async (req:AuthRequest,res:Response) =>{
     try {
         
