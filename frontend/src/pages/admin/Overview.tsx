@@ -17,9 +17,9 @@ export function Overview() {
     const fetchStats = async ()=>{
       const [students,teachers,parents,classes] = await Promise.all([
         api.get("/student"),
-        api.get("teacher"),
-        api.get("parent"),
-        api.get("classes")
+        api.get("/teacher"),
+        api.get("/parent"),
+        api.get("/classes") 
         
       ])
       setStats({
