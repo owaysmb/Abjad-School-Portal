@@ -18,10 +18,15 @@ dotenv.config()
 
 
 const app = express()
+
 app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true 
+  origin: [
+    'http://localhost:5173',
+    'https://abjad-school-frontend.onrender.com'
+  ],
+  credentials: true
 }));
+
 app.use(express.json())
 app.use(cookieParser())
 app.use('/api/auth', authRoutes)
