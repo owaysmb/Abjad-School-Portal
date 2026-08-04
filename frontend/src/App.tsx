@@ -19,7 +19,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={
-            user ? <Navigate to={`  /${user.role.toLowerCase()}`} /> : <LoginPage />
+            user ? <Navigate to={`/${user.role.toLowerCase()}`} /> : <LoginPage />
           } />
           <Route path="/admin" element={
             <ProtectedRoute role="ADMIN">
