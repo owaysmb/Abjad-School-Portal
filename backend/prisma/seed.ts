@@ -101,14 +101,7 @@ async function main() {
       studentId: studentUser.student!.id
     }
   })
-  console.log('Child assigned to parent')
 
-  console.log('Seeding complete!')
-  console.log('---')
-  console.log('Admin: admin@abjad.com / admin123')
-  console.log('Teacher: hassan@abjad.com / teacher123')
-  console.log('Student: ahmed@abjad.com / student123')
-  console.log('Parent: sami@abjad.com / parent123')
 }
 
 main()
